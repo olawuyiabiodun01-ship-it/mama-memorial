@@ -347,6 +347,19 @@
     }
     .memory-rel { font-size: 0.8rem; color: var(--cream-dim); }
     .memory-audio { margin-top: 0.8rem; width: 100%; accent-color: var(--gold); }
+    .delete-btn {
+      margin-top: 1rem;
+      background: none;
+      border: 1px solid rgba(180,60,60,0.3);
+      color: rgba(180,60,60,0.6);
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      padding: 0.3rem 0.8rem;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .delete-btn:hover { border-color: #b43c3c; color: #b43c3c; }
 
     /* form */
     .add-memory {
@@ -532,12 +545,18 @@
            <img src="photos/your-photo-name.jpg" alt="A description">
          </div>
     -->
-    <div class="gallery-placeholder">Add Photo</div>
-    <div class="gallery-placeholder">Add Photo</div>
-    <div class="gallery-placeholder">Add Photo</div>
-    <div class="gallery-placeholder">Add Photo</div>
-    <div class="gallery-placeholder">Add Photo</div>
-    <div class="gallery-placeholder">Add Photo</div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-28 233738.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-28 233801.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000029.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000054.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000121.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000156.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000214.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000236.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000256.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000312.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000347.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000451.png" alt="Mama"></div>
   </div>
 </section>
 
@@ -764,8 +783,21 @@
         ${m.audio_url ? `<audio class="memory-audio" controls src="${escHtml(m.audio_url)}"></audio>` : ''}
         <p class="memory-author">${escHtml(m.name || 'Anonymous')}</p>
         ${m.relationship ? `<p class="memory-rel">${escHtml(m.relationship)}</p>` : ''}
+        <button class="delete-btn" onclick="deleteMemory('${m.id}')">&#128465; Delete</button>
       </div>
     `).join('');
+  }
+
+  async function deleteMemory(id) {
+    const pwd = prompt('Enter admin password to delete this memory:');
+    if (pwd === null) return;
+    if (pwd !== 'mama2014') {
+      alert('Incorrect password.');
+      return;
+    }
+    const { error } = await sb.from('tributes').delete().eq('id', id);
+    if (error) { alert('Delete failed. Please try again.'); return; }
+    loadMemories();
   }
 
   function escHtml(str) {
