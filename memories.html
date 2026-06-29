@@ -101,6 +101,7 @@
         ${m.audio_url ? `<audio class="memory-audio" controls src="${escHtml(m.audio_url)}"></audio>` : ''}
         <p class="memory-author">${escHtml(m.name || 'Anonymous')}</p>
         ${m.relationship ? `<p class="memory-rel">${escHtml(m.relationship)}</p>` : ''}
+        <button onclick="adminDelete('${m.id}')" style="margin-top:0.6rem;background:none;border:none;color:var(--cream-dim);font-size:0.7rem;font-family:'Cormorant Garant',serif;letter-spacing:0.08em;cursor:pointer;opacity:0.4;padding:0;" title="Admin delete">✕ remove</button>
       </div>
     `).join('');
 
@@ -120,6 +121,15 @@
     const el = document.getElementById('msg-' + id);
     const btn = document.getElementById('rm-' + id);
     btn.textContent = el.classList.toggle('expanded') ? 'Read less' : 'Read more';
+  }
+
+  // ── ADMIN DELETE ──
+  async function adminDelete(id) {
+    const pwd = prompt('Admin password:');
+    if (pwd === null) return;
+    if (pwd !== 'mama2014') { alert('Incorrect password.'); return; }
+    await sb.from('tributes').delete().eq('id', id);
+    loadMemories();
   }
 
   // ── VOICE RECORDER ──
