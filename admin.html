@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Ayodele Arinke Memorial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .login-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 3rem 2.5rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .login-box .page-label { margin-bottom: 0.5rem; }
+    .login-box h1 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+    }
+    .login-box p {
+      font-size: 0.88rem;
+      color: var(--cream-dim);
+      font-style: italic;
+      margin-bottom: 2rem;
+    }
+    .login-box input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--cream);
+      padding: 0.8rem 1rem;
+      font-family: 'Cormorant Garant', serif;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+      transition: border-color 0.3s;
+    }
+    .login-box input:focus { border-color: var(--gold); }
+    .login-error {
+      color: #b94040;
+      font-size: 0.82rem;
+      font-style: italic;
+      min-height: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── ADMIN DASHBOARD ── */
+    #dashboard { display: none; }
+
+    .admin-header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .admin-header h1 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+    }
+    .admin-header-links { display: flex; gap: 1rem; align-items: center; }
+    .admin-header-links a {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      color: var(--cream-dim);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .admin-header-links a:hover { color: var(--gold); }
+
+    .admin-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .admin-section {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+    }
+    .admin-section-head {
+      padding: 1.2rem 1.8rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .admin-section-head h2 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.88rem;
+      font-weight: 300;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+    }
+    .admin-section-body { padding: 1.8rem; }
+
+    /* event list */
+    .event-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .event-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .event-row-info { flex: 1; }
+    .event-row-year {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      margin-bottom: 0.2rem;
+    }
+    .event-row-title { font-size: 1rem; color: var(--cream); }
+    .event-row-story { font-size: 0.85rem; color: var(--cream-dim); font-style: italic; margin-top: 0.2rem; }
+    .event-row-photos { font-size: 0.75rem; color: var(--cream-dim); margin-top: 0.3rem; }
+    .event-row-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+    /* memory list */
+    .memory-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .memory-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .memory-row-info { flex: 1; min-width: 0; }
+    .memory-row-name {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+    }
+    .memory-row-rel { font-size: 0.8rem; color: var(--cream-dim); }
+    .memory-row-text {
+      font-size: 0.88rem;
+      color: var(--cream);
+      font-style: italic;
+      margin-top: 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .memory-row-audio { font-size: 0.75rem; color: var(--cream-dim); margin-top: 0.2rem; }
+
+    .empty-state {
+      text-align: center;
+      color: var(--cream-dim);
+      font-style: italic;
+      font-size: 0.9rem;
+      padding: 2rem 0;
+    }
+
+    /* inline form */
+    .inline-form { padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 0.5rem; }
+    .inline-form h3 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+
+    @media (max-width: 600px) {
+      .admin-section-body { padding: 1.2rem; }
+      .event-row, .memory-row { flex-direction: column; gap: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <p class="page-label">Admin</p>
+    <h1>Dashboard</h1>
+    <p>Enter the admin password to manage the memorial site</p>
+    <input type="password" id="pwd-input" placeholder="· · · · · · · ·" onkeydown="if(event.key==='Enter')login()">
+    <p class="login-error" id="login-error"></p>
+    <button class="btn primary" onclick="login()" style="width:100%;padding:0.8rem;">Enter</button>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ── -->
+<div id="dashboard">
+  <div class="admin-header">
+    <h1>Admin Dashboard</h1>
+    <div class="admin-header-links">
+      <a href="index.html">← Back to Site</a>
+      <button class="btn danger" onclick="logout()" style="padding:0.4rem 1rem;font-size:0.68rem;">Log Out</button>
+    </div>
+  </div>
+
+  <div class="admin-wrap">
+
+    <!-- ── FOUNDATION EVENTS ── -->
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>Foundation Events</h2>
+        <button class="btn" onclick="toggleAddEvent()">+ Add Event</button>
+      </div>
+      <div class="admin-section-body">
+        <div id="events-list"><div class="empty-state">Loading…</div></div>
+
+        <!-- Add event form -->
+        <div class="inline-form" id="add-event-form" style="display:none">
+          <h3>New Event</h3>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="ev-year">Year</label>
+              <input type="number" id="ev-year" placeholder="e.g. 2025" min="2014" max="2100">
+            </div>
+            <div class="form-field">
+              <label for="ev-title">Title</label>
+              <input type="text" id="ev-title" placeholder="e.g. 11th Remembrance Outreach">
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="ev-story">Story</label>
+            <textarea id="ev-story" style="min-height:120px;" placeholder="Describe the event — who was reached, what was given, how it felt…"></textarea>
+          </div>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <button class="btn primary" onclick="submitEvent()">Save Event</button>
+            <button class="btn" onclick="toggleAddEvent()">Cancel</button>
+          </div>
+          <p class="submit-status" id="event-status"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MEMORIES ── -->
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>Family Memories</h2>
+        <button class="btn" id="arrange-toggle-btn" onclick="toggleArrange()">⠿ Arrange</button>
+      </div>
+      <div class="admin-section-body">
+        <div id="memories-list"><div class="empty-state">Loading…</div></div>
+        <p class="submit-status" id="arrange-status"></p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL  = 'https://apvslzcldlqzskawpzzk.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_8hgovw8SLg4S4ZR2-p26Sg_v3CGpTPg';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const ADMIN_PWD = 'mama2014';
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── LOGIN ──
+  function login() {
+    const val = document.getElementById('pwd-input').value;
+    if (val === ADMIN_PWD) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      sessionStorage.setItem('admin', '1');
+      loadAll();
+    } else {
+      document.getElementById('login-error').textContent = 'Incorrect password.';
+      document.getElementById('pwd-input').value = '';
+    }
+  }
+  function logout() {
+    sessionStorage.removeItem('admin');
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('pwd-input').value = '';
+  }
+
+  // Auto-login if session still active
+  if (sessionStorage.getItem('admin') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadAll();
+  }
+
+  function loadAll() { loadEvents(); loadMemories(); }
+
+  // ── FOUNDATION EVENTS ──
+  let eventsData = [];
+
+  async function loadEvents() {
+    const list = document.getElementById('events-list');
+    const { data } = await sb.from('foundation_events').select('*, foundation_photos(count)').order('year', { ascending: false });
+    eventsData = data || [];
+    if (!eventsData.length) {
+      list.innerHTML = '<div class="empty-state">No events yet. Add the first one above.</div>'; return;
+    }
+    list.innerHTML = eventsData.map(ev => `
+      <div class="event-row">
+        <div class="event-row-info">
+          <p class="event-row-year">${ev.year}</p>
+          <p class="event-row-title">${escHtml(ev.title)}</p>
+          ${ev.story ? `<p class="event-row-story">${escHtml(ev.story.slice(0, 120))}${ev.story.length > 120 ? '…' : ''}</p>` : ''}
+        </div>
+        <div class="event-row-actions">
+          <button class="delete-btn" onclick="deleteEvent('${ev.id}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function toggleAddEvent() {
+    const form = document.getElementById('add-event-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+
+  async function submitEvent() {
+    const year  = parseInt(document.getElementById('ev-year').value);
+    const title = document.getElementById('ev-title').value.trim();
+    const story = document.getElementById('ev-story').value.trim();
+    const status = document.getElementById('event-status');
+    if (!year || !title) { status.textContent = 'Please fill in year and title.'; return; }
+    status.textContent = 'Saving…';
+    const { error } = await sb.from('foundation_events').insert({ year, title, story });
+    if (error) { status.textContent = 'Error: ' + error.message; return; }
+    status.textContent = 'Event added!';
+    document.getElementById('ev-year').value = '';
+    document.getElementById('ev-title').value = '';
+    document.getElementById('ev-story').value = '';
+    toggleAddEvent();
+    setTimeout(() => { status.textContent = ''; }, 2500);
+    loadEvents();
+  }
+
+  async function deleteEvent(id) {
+    if (!confirm('Delete this event and all its photos? This cannot be undone.')) return;
+    await sb.from('foundation_events').delete().eq('id', id);
+    loadEvents();
+  }
+
+  // ── MEMORIES ──
+  let memoriesData = [];
+  let arrangeActive = false;
+  let dragSrc = null;
+
+  async function loadMemories() {
+    const list = document.getElementById('memories-list');
+    const { data } = await sb.from('tributes').select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+    memoriesData = data || [];
+    renderMemories();
+  }
+
+  function renderMemories() {
+    const list = document.getElementById('memories-list');
+    if (!memoriesData.length) {
+      list.innerHTML = '<div class="empty-state">No memories yet.</div>'; return;
+    }
+    list.innerHTML = memoriesData.map(m => `
+      <div class="memory-row" data-id="${m.id}" draggable="${arrangeActive}">
+        <div class="memory-row-info">
+          <p class="memory-row-name">${escHtml(m.name || 'Anonymous')}</p>
+          ${m.relationship ? `<p class="memory-row-rel">${escHtml(m.relationship)}</p>` : ''}
+          ${m.message ? `<p class="memory-row-text">${escHtml(m.message)}</p>` : ''}
+          ${m.audio_url ? `<p class="memory-row-audio">🎙 Voice note attached</p>` : ''}
+        </div>
+        <div class="event-row-actions">
+          <button class="delete-btn" onclick="deleteMemory('${m.id}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    if (arrangeActive) bindDrag();
+  }
+
+  async function deleteMemory(id) {
+    if (!confirm('Delete this memory? This cannot be undone.')) return;
+    await sb.from('tributes').delete().eq('id', id);
+    loadMemories();
+  }
+
+  // ── ARRANGE ──
+  function toggleArrange() {
+    arrangeActive = !arrangeActive;
+    const btn = document.getElementById('arrange-toggle-btn');
+    btn.textContent = arrangeActive ? '✓ Save Order' : '⠿ Arrange';
+    btn.classList.toggle('primary', arrangeActive);
+    if (!arrangeActive) saveOrder();
+    else renderMemories();
+  }
+
+  function bindDrag() {
+    document.querySelectorAll('.memory-row').forEach(row => {
+      row.addEventListener('dragstart', e => { dragSrc = row; row.style.opacity = '0.4'; e.dataTransfer.effectAllowed = 'move'; });
+      row.addEventListener('dragend', () => { row.style.opacity = '1'; });
+      row.addEventListener('dragover', e => { e.preventDefault(); row.style.outline = '2px solid var(--gold)'; });
+      row.addEventListener('dragleave', () => { row.style.outline = ''; });
+      row.addEventListener('drop', e => {
+        e.preventDefault(); row.style.outline = '';
+        if (dragSrc === row) return;
+        const rows = [...document.querySelectorAll('.memory-row')];
+        rows.indexOf(dragSrc) < rows.indexOf(row) ? row.after(dragSrc) : row.before(dragSrc);
+      });
+    });
+  }
+
+  async function saveOrder() {
+    const rows = [...document.querySelectorAll('.memory-row')];
+    const status = document.getElementById('arrange-status');
+    status.textContent = 'Saving order…';
+    await Promise.all(rows.map((r, i) => sb.from('tributes').update({ sort_order: i }).eq('id', r.dataset.id)));
+    status.textContent = 'Order saved!';
+    setTimeout(() => { status.textContent = ''; }, 2000);
+    loadMemories();
+  }
+</script>
+</body>
+</html>
