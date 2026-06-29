@@ -882,12 +882,55 @@
     recInd.classList.remove('active');
   };
 
-  audioUpload.onchange = () => {
+  audioUpload.onchange = async () => {
     const file = audioUpload.files[0];
     if (!file) return;
-    audioBlob = file;
-    previewAud.src = URL.createObjectURL(file);
-    previewAud.style.display = 'block';
+
+    const needsConvert = ['audio/ogg','audio/opus','audio/amr','audio/amr-wb']
+      .includes(file.type) || file.name.endsWith('.opus') || file.name.endsWith('.amr');
+
+    if (!needsConvert) {
+      audioBlob = file;
+      previewAud.src = URL.createObjectURL(file);
+      previewAud.style.display = 'block';
+      return;
+    }
+
+    // Convert incompatible formats (e.g. WhatsApp .opus) to browser-playable webm
+    document.getElementById('submit-status').textContent = 'Converting audio…';
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const audioCtx   = new AudioContext();
+      const decoded    = await audioCtx.decodeAudioData(arrayBuffer);
+
+      // Play decoded audio into a MediaStreamDestination and record it
+      const dest      = audioCtx.createMediaStreamDestination();
+      const source    = audioCtx.createBufferSource();
+      source.buffer   = decoded;
+      source.connect(dest);
+
+      const recorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm' });
+      const chunks   = [];
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = () => {
+        audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        previewAud.src = URL.createObjectURL(audioBlob);
+        previewAud.style.display = 'block';
+        document.getElementById('submit-status').textContent = '';
+        audioCtx.close();
+      };
+
+      recorder.start();
+      source.start();
+      source.onended = () => recorder.stop();
+    } catch(e) {
+      // Fallback: just use the file as-is and let Supabase store it
+      console.warn('Conversion failed, using original:', e);
+      audioBlob = file;
+      previewAud.src = URL.createObjectURL(file);
+      previewAud.style.display = 'block';
+      document.getElementById('submit-status').textContent = '';
+    }
   };
 
   // ── SUBMIT MEMORY ─────────────────────────────────────────────────────────
