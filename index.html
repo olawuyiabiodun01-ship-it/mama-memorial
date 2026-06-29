@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -9,7 +9,94 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="preload" as="image" href="portrait.jpg">
   <style>
-    /* HOME-SPECIFIC */
+    /* ── CINEMATIC SPLASH ── */
+    #splash {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0b0a09;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      transition: opacity 1.2s ease;
+    }
+    #splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .splash-portrait {
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(200,169,110,0.5);
+      box-shadow: 0 0 60px rgba(200,169,110,0.18), 0 0 120px rgba(200,169,110,0.06);
+      opacity: 0;
+      animation: fadeUp 1.4s ease 0.3s forwards;
+    }
+    .splash-name {
+      font-family: 'Cormorant SC', serif;
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: #f0ebe0;
+      margin-top: 1.8rem;
+      line-height: 1.3;
+      opacity: 0;
+      animation: fadeUp 1.2s ease 1s forwards;
+    }
+    .splash-dates {
+      font-size: 0.85rem;
+      letter-spacing: 0.28em;
+      color: #c8a96e;
+      margin-top: 0.7rem;
+      opacity: 0;
+      animation: fadeUp 1s ease 1.6s forwards;
+    }
+    .splash-line {
+      width: 50px; height: 1px;
+      background: linear-gradient(to right, transparent, #c8a96e, transparent);
+      margin: 1.6rem auto 0;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 2s forwards;
+    }
+    .splash-verse {
+      font-style: italic;
+      color: rgba(200,169,110,0.7);
+      font-size: 0.88rem;
+      max-width: 340px;
+      line-height: 1.7;
+      margin-top: 1.2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 2.4s forwards;
+    }
+    #splash-enter {
+      margin-top: 2.2rem;
+      background: none;
+      border: 1px solid rgba(200,169,110,0.45);
+      color: #c8a96e;
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.28em;
+      padding: 0.75rem 2.2rem;
+      cursor: pointer;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 3s forwards;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    #splash-enter:hover {
+      background: rgba(200,169,110,0.08);
+      border-color: rgba(200,169,110,0.8);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── HOME HERO ── */
     #hero {
       min-height: 100vh;
       display: flex;
@@ -67,10 +154,34 @@
       color: var(--cream-dim);
       max-width: 520px;
       position: relative; z-index: 1;
-      margin-bottom: 3.5rem;
+      margin-bottom: 1.4rem;
     }
 
-    /* NAV CARDS */
+    /* ── LIVE COUNTER ── */
+    #counter-wrap {
+      position: relative; z-index: 1;
+      margin-bottom: 3.5rem;
+      text-align: center;
+    }
+    .counter-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      color: var(--cream-dim);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    #counter {
+      font-family: 'Cormorant SC', serif;
+      font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+      color: var(--gold);
+      letter-spacing: 0.06em;
+    }
+    #counter span {
+      color: var(--gold-lt);
+      font-size: 1.4em;
+    }
+
+    /* ── NAV CARDS ── */
     .nav-cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -106,16 +217,74 @@
       .nav-cards { grid-template-columns: 1fr 1fr; }
       .nav-card { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
     }
+
+    /* ── HYMN PLAYER ── */
+    #hymn-player {
+      position: fixed;
+      bottom: 1.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 0.55rem 1.1rem 0.55rem 0.9rem;
+      white-space: nowrap;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    #hymn-player.visible { opacity: 1; }
+    #hymn-btn {
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    #hymn-btn:hover { color: var(--gold-lt); }
+    .hymn-label {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.16em;
+      color: var(--cream-dim);
+    }
+    .hymn-note {
+      font-size: 0.72rem;
+      color: var(--cream-dim);
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
 
+<!-- ══ CINEMATIC SPLASH ══ -->
+<div id="splash">
+  <img class="splash-portrait" src="portrait.jpg" alt="Mama">
+  <p class="splash-name">Olawuyi Victoria<br>Ayodele Arinke</p>
+  <p class="splash-dates">23 · 05 · 1942 &nbsp;—&nbsp; 28 · 06 · 2014</p>
+  <div class="splash-line"></div>
+  <p class="splash-verse">"Many daughters have done virtuously,<br>but thou excellest them all."<br><em style="font-size:0.78em;letter-spacing:0.1em;">Proverbs 31:29</em></p>
+  <button id="splash-enter">Enter &nbsp;›</button>
+</div>
+
+<!-- ══ MAIN PAGE ══ -->
 <section id="hero">
   <img class="hero-portrait" src="portrait.jpg" alt="Olawuyi Victoria Ayodele Arinke" fetchpriority="high">
   <h1 class="hero-name">Olawuyi Victoria<br>Ayodele Arinke</h1>
   <p class="hero-dates">23 · 05 · 1942 &nbsp;—&nbsp; 28 · 06 · 2014</p>
   <div class="hero-divider"></div>
   <p class="hero-tribute">A woman of grace, love, and unwavering strength.</p>
+
+  <div id="counter-wrap">
+    <p class="counter-label">She flew to glory</p>
+    <p id="counter">calculating…</p>
+  </div>
 
   <div class="nav-cards">
     <a class="nav-card" href="gallery.html">
@@ -126,7 +295,7 @@
     <a class="nav-card" href="recordings.html">
       <span class="nav-card-icon">🎙</span>
       <span class="nav-card-title">Recordings</span>
-      <span class="nav-card-desc">Her voice & videos</span>
+      <span class="nav-card-desc">Her voice &amp; videos</span>
     </a>
     <a class="nav-card" href="timeline.html">
       <span class="nav-card-icon">✦</span>
@@ -149,7 +318,153 @@
 <footer>
   <p>In loving memory of <span>Olawuyi Victoria Ayodele Arinke</span></p>
   <p style="margin-top:0.4rem;font-size:0.75rem;letter-spacing:0.12em;">23 May 1942 &nbsp;·&nbsp; 28 June 2014</p>
-  </footer>
+</footer>
+
+<!-- ══ HYMN PLAYER ══ -->
+<div id="hymn-player">
+  <button id="hymn-btn" title="Toggle hymn">♪</button>
+  <span class="hymn-label">'Tis Love That Makes Us Happy</span>
+  <span class="hymn-note">— her favourite hymn</span>
+</div>
+
+<script>
+// ── LIVE COUNTER ──
+(function () {
+  const gone = new Date('2014-06-28T00:00:00');
+
+  function update() {
+    const now  = new Date();
+    let years  = now.getFullYear() - gone.getFullYear();
+    let months = now.getMonth()    - gone.getMonth();
+    let days   = now.getDate()     - gone.getDate();
+
+    if (days < 0) {
+      months--;
+      const prev = new Date(now.getFullYear(), now.getMonth(), 0);
+      days += prev.getDate();
+    }
+    if (months < 0) { years--; months += 12; }
+
+    const y = `<span>${years}</span> year${years !== 1 ? 's' : ''}`;
+    const m = `<span>${months}</span> month${months !== 1 ? 's' : ''}`;
+    const d = `<span>${days}</span> day${days !== 1 ? 's' : ''} ago`;
+    document.getElementById('counter').innerHTML = `${y}, ${m} and ${d}`;
+  }
+
+  update();
+  setInterval(update, 60000);
+})();
+
+
+// ── HYMN (Web Audio API) ──
+// Notes for 'Tis Love That Makes Us Happy (SDA Hymnal 440) in D major
+const HYMN_NOTES = [
+  // Verse: "'Tis love that makes us happy"
+  [293.66,0.4],[369.99,0.4],[369.99,0.4],[415.30,0.4],[369.99,0.4],[293.66,0.4],[246.94,0.4],[220.00,0.8],
+  // "love that smooths the way"
+  [246.94,0.4],[293.66,0.4],[329.63,0.4],[369.99,0.4],[329.63,0.8],[293.66,0.8],
+  // "It helps us mind, it makes us kind"
+  [369.99,0.4],[415.30,0.4],[493.88,0.4],[440.00,0.4],[415.30,0.4],[369.99,0.4],[329.63,0.4],[293.66,0.8],
+  // "to others every day"
+  [246.94,0.4],[220.00,0.4],[246.94,0.4],[293.66,0.8],[293.66,1.2],
+  // Refrain: "God is love; we're His little children"
+  [369.99,0.4],[440.00,0.4],[493.88,0.4],[440.00,0.4],[415.30,0.4],[369.99,0.4],[329.63,0.4],[293.66,0.8],
+  [246.94,0.4],[293.66,0.4],[329.63,0.8],[293.66,1.2],
+  // "God is love; we would be like Him"
+  [369.99,0.4],[440.00,0.4],[493.88,0.4],[440.00,0.4],[415.30,0.8],[369.99,0.8],
+  // "'Tis love that makes us happy"
+  [293.66,0.4],[369.99,0.4],[369.99,0.4],[415.30,0.4],[369.99,0.4],[293.66,0.4],[246.94,0.4],[220.00,0.8],
+  // close
+  [246.94,0.4],[293.66,0.4],[329.63,0.4],[369.99,0.8],[293.66,1.6],
+];
+
+let audioCtx = null;
+let hymnPlaying = false;
+let hymnNodes = [];
+let hymnTimeout = null;
+let hymnLoopIdx = 0;
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playNote(freq, duration, startTime) {
+  const osc  = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(0.08, startTime + 0.04);
+  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.02);
+  osc.start(startTime);
+  osc.stop(startTime + duration);
+  hymnNodes.push(osc);
+}
+
+function scheduleHymn() {
+  if (!hymnPlaying) return;
+  let t = audioCtx.currentTime + 0.05;
+  const beat = 0.52;
+  HYMN_NOTES.forEach(([freq, beats]) => {
+    playNote(freq, beats * beat * 0.9, t);
+    t += beats * beat;
+  });
+  // loop after all notes finish + short pause
+  const totalDur = HYMN_NOTES.reduce((s, [, b]) => s + b * beat, 0);
+  hymnTimeout = setTimeout(scheduleHymn, (totalDur + 1) * 1000);
+}
+
+function stopHymn() {
+  clearTimeout(hymnTimeout);
+  hymnNodes.forEach(n => { try { n.stop(); } catch(e){} });
+  hymnNodes = [];
+}
+
+const hymnBtn = document.getElementById('hymn-btn');
+hymnBtn.addEventListener('click', () => {
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (hymnPlaying) {
+    hymnPlaying = false;
+    stopHymn();
+    hymnBtn.textContent = '♪';
+    hymnBtn.title = 'Play hymn';
+  } else {
+    hymnPlaying = true;
+    scheduleHymn();
+    hymnBtn.textContent = '■';
+    hymnBtn.title = 'Stop hymn';
+  }
+});
+
+
+// ── SPLASH ──
+(function () {
+  const splash = document.getElementById('splash');
+  const enterBtn = document.getElementById('splash-enter');
+  const player = document.getElementById('hymn-player');
+
+  function dismiss() {
+    // start hymn on user gesture
+    initAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    hymnPlaying = true;
+    scheduleHymn();
+    hymnBtn.textContent = '■';
+    hymnBtn.title = 'Stop hymn';
+
+    splash.classList.add('fade-out');
+    setTimeout(() => {
+      splash.style.display = 'none';
+      player.classList.add('visible');
+    }, 1300);
+  }
+
+  enterBtn.addEventListener('click', dismiss);
+})();
+</script>
 
 <script src="nav.js"></script>
 </body>
