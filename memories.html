@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memories · Olawuyi Victoria Ayodele Arinke</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="gallery.html">Gallery</a>
+  <a href="recordings.html">Recordings</a>
+  <a href="timeline.html">Timeline</a>
+  <a href="memories.html" class="active">Memories</a>
+  <a href="foundation.html">Foundation</a>
+</nav>
+
+<div class="page-hero">
+  <p class="page-label">Family</p>
+  <h1 class="page-title">Memories &amp; Tributes</h1>
+  <div class="page-divider"></div>
+</div>
+
+<div class="content">
+
+  <!-- Arrange controls — admin only -->
+  <div class="arrange-bar" id="arrange-bar" style="display:none">
+    <button class="btn" id="arrange-btn" onclick="toggleArrange()">&#9776; Arrange Memories</button>
+    <p id="arrange-hint"></p>
+    <button class="btn primary" id="save-order-btn" onclick="saveOrder()" style="display:none">Save Order</button>
+  </div>
+  <button class="btn" id="unlock-arrange-btn" onclick="unlockArrange()" style="margin-bottom:1.5rem;">&#128274; Arrange Memories</button>
+
+  <!-- Memories wall -->
+  <div class="memories-grid" id="memories-grid">
+    <div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:2rem 1rem;">
+      Loading memories…
+    </div>
+  </div>
+
+  <!-- Leave a memory form -->
+  <div class="form-box">
+    <h3>Leave a Memory</h3>
+    <div class="form-row">
+      <div class="form-field">
+        <label for="mem-name">Your Name</label>
+        <input type="text" id="mem-name" placeholder="e.g. Adetunji">
+      </div>
+      <div class="form-field">
+        <label for="mem-rel">Relationship</label>
+        <input type="text" id="mem-rel" placeholder="e.g. Son, Daughter, Friend">
+      </div>
+    </div>
+    <div class="form-field">
+      <label for="mem-text">Your Memory or Tribute</label>
+      <textarea id="mem-text" placeholder="Share a memory, something she always said, what she meant to you…"></textarea>
+    </div>
+    <div class="form-field">
+      <label>Voice Note <span style="font-style:italic;opacity:0.7">(optional)</span></label>
+      <div class="voice-recorder">
+        <p>Record a message in your own voice, or upload an audio file</p>
+        <div class="recorder-btns">
+          <button class="btn" id="rec-start">&#9679;&ensp;Record</button>
+          <button class="btn danger" id="rec-stop" disabled>&#9632;&ensp;Stop</button>
+          <label class="btn" style="cursor:pointer;display:inline-block;">
+            Upload Audio
+            <input type="file" id="audio-upload" accept="audio/*,.opus,.ogg,.m4a,.mp3,.wav,.webm,.aac,.amr" style="display:none">
+          </label>
+        </div>
+        <div class="recording-indicator" id="rec-indicator">
+          <div class="rec-dot"></div>&ensp;Recording…
+        </div>
+        <audio id="preview-audio" controls style="width:100%;accent-color:var(--gold);display:none;margin-top:0.5rem;"></audio>
+      </div>
+    </div>
+    <button class="btn primary" id="submit-memory" style="width:100%;padding:0.85rem;">Share This Memory</button>
+    <p class="submit-status" id="submit-status"></p>
+  </div>
+
+</div>
+
+<footer>
+  <p>In loving memory of <span>Olawuyi Victoria Ayodele Arinke</span></p>
+  <p style="margin-top:0.4rem;font-size:0.75rem;letter-spacing:0.12em;">23 May 1942 &nbsp;·&nbsp; 28 June 2014</p>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="recordings.html">Recordings</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="foundation.html">Foundation</a>
+  </nav>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL  = 'https://apvslzcldlqzskawpzzk.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_8hgovw8SLg4S4ZR2-p26Sg_v3CGpTPg';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // ── LOAD MEMORIES ──
+  async function loadMemories() {
+    const grid = document.getElementById('memories-grid');
+    const { data, error } = await sb.from('tributes').select('*')
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (error || !data || !data.length) {
+      grid.innerHTML = '<div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:2rem 1rem;">Be the first to share a memory.</div>';
+      return;
+    }
+    grid.innerHTML = data.map(m => `
+      <div class="memory-card" data-id="${m.id}">
+        ${m.message ? `<p class="memory-text" id="msg-${m.id}">${escHtml(m.message)}</p>
+        <button class="read-more-btn" id="rm-${m.id}" onclick="toggleReadMore('${m.id}')">Read more</button>` : ''}
+        ${m.audio_url ? `<audio class="memory-audio" controls src="${escHtml(m.audio_url)}"></audio>` : ''}
+        <p class="memory-author">${escHtml(m.name || 'Anonymous')}</p>
+        ${m.relationship ? `<p class="memory-rel">${escHtml(m.relationship)}</p>` : ''}
+        <button class="delete-btn" onclick="deleteMemory('${m.id}')">&#128465; Delete</button>
+      </div>
+    `).join('');
+
+    data.forEach(m => {
+      if (!m.message) return;
+      const el = document.getElementById('msg-' + m.id);
+      const btn = document.getElementById('rm-' + m.id);
+      if (el && btn && el.scrollHeight > el.clientHeight + 2) btn.classList.add('visible');
+    });
+  }
+  loadMemories();
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function toggleReadMore(id) {
+    const el = document.getElementById('msg-' + id);
+    const btn = document.getElementById('rm-' + id);
+    btn.textContent = el.classList.toggle('expanded') ? 'Read less' : 'Read more';
+  }
+
+  // ── ARRANGE MODE ──
+  let arrangeActive = false, dragSrc = null;
+
+  function unlockArrange() {
+    const pwd = prompt('Enter admin password:');
+    if (!pwd) return;
+    if (pwd !== 'mama2014') { alert('Incorrect password.'); return; }
+    document.getElementById('unlock-arrange-btn').style.display = 'none';
+    document.getElementById('arrange-bar').style.display = 'flex';
+  }
+  function toggleArrange() {
+    const grid = document.getElementById('memories-grid');
+    const btn = document.getElementById('arrange-btn');
+    const hint = document.getElementById('arrange-hint');
+    const saveBtn = document.getElementById('save-order-btn');
+    arrangeActive = !arrangeActive;
+    grid.classList.toggle('arrange-mode', arrangeActive);
+    btn.textContent = arrangeActive ? '✕ Cancel' : '⠿ Arrange Memories';
+    hint.textContent = arrangeActive ? 'Drag cards to reorder, then click Save Order.' : '';
+    saveBtn.style.display = arrangeActive ? 'inline-block' : 'none';
+    grid.querySelectorAll('.memory-card').forEach(card => {
+      card.setAttribute('draggable', arrangeActive ? 'true' : 'false');
+      if (arrangeActive) {
+        card.addEventListener('dragstart', onDragStart);
+        card.addEventListener('dragover', onDragOver);
+        card.addEventListener('dragleave', onDragLeave);
+        card.addEventListener('drop', onDrop);
+        card.addEventListener('dragend', onDragEnd);
+      } else {
+        card.removeEventListener('dragstart', onDragStart);
+        card.removeEventListener('dragover', onDragOver);
+        card.removeEventListener('dragleave', onDragLeave);
+        card.removeEventListener('drop', onDrop);
+        card.removeEventListener('dragend', onDragEnd);
+      }
+    });
+  }
+  function onDragStart(e) { dragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+  function onDragOver(e) { e.preventDefault(); this.classList.add('drag-over'); }
+  function onDragLeave() { this.classList.remove('drag-over'); }
+  function onDragEnd() { this.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }
+  function onDrop(e) {
+    e.preventDefault(); this.classList.remove('drag-over');
+    if (dragSrc === this) return;
+    const cards = [...document.getElementById('memories-grid').querySelectorAll('.memory-card')];
+    cards.indexOf(dragSrc) < cards.indexOf(this) ? this.after(dragSrc) : this.before(dragSrc);
+  }
+  async function saveOrder() {
+    const cards = [...document.getElementById('memories-grid').querySelectorAll('.memory-card')];
+    await Promise.all(cards.map((c, i) => sb.from('tributes').update({ sort_order: i }).eq('id', c.dataset.id)));
+    document.getElementById('arrange-hint').textContent = 'Order saved!';
+    setTimeout(() => { document.getElementById('arrange-hint').textContent = 'Drag cards to reorder, then click Save Order.'; }, 2000);
+  }
+
+  // ── DELETE ──
+  async function deleteMemory(id) {
+    const pwd = prompt('Enter admin password to delete:');
+    if (!pwd) return;
+    if (pwd !== 'mama2014') { alert('Incorrect password.'); return; }
+    await sb.from('tributes').delete().eq('id', id);
+    loadMemories();
+  }
+
+  // ── VOICE RECORDER ──
+  let mediaRecorder, audioChunks = [], audioBlob = null;
+  const recStart = document.getElementById('rec-start');
+  const recStop = document.getElementById('rec-stop');
+  const recInd = document.getElementById('rec-indicator');
+  const previewAud = document.getElementById('preview-audio');
+  const audioUpload = document.getElementById('audio-upload');
+
+  recStart.onclick = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        previewAud.src = URL.createObjectURL(audioBlob);
+        previewAud.style.display = 'block';
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      recStart.disabled = true; recStop.disabled = false;
+      recInd.classList.add('active');
+    } catch(e) { alert('Microphone access is needed to record.'); }
+  };
+  recStop.onclick = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    recStart.disabled = false; recStop.disabled = true;
+    recInd.classList.remove('active');
+  };
+  audioUpload.onchange = async () => {
+    const file = audioUpload.files[0];
+    if (!file) return;
+    const needsConvert = ['audio/ogg','audio/opus','audio/amr'].includes(file.type) || file.name.endsWith('.opus') || file.name.endsWith('.amr');
+    if (!needsConvert) {
+      audioBlob = file; previewAud.src = URL.createObjectURL(file); previewAud.style.display = 'block'; return;
+    }
+    document.getElementById('submit-status').textContent = 'Converting audio…';
+    try {
+      const audioCtx = new AudioContext();
+      const decoded = await audioCtx.decodeAudioData(await file.arrayBuffer());
+      const dest = audioCtx.createMediaStreamDestination();
+      const source = audioCtx.createBufferSource();
+      source.buffer = decoded; source.connect(dest);
+      const recorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm' });
+      const chunks = [];
+      recorder.ondataavailable = e => chunks.push(e.data);
+      recorder.onstop = () => {
+        audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        previewAud.src = URL.createObjectURL(audioBlob);
+        previewAud.style.display = 'block';
+        document.getElementById('submit-status').textContent = '';
+        audioCtx.close();
+      };
+      recorder.start(); source.start();
+      source.onended = () => recorder.stop();
+    } catch(e) {
+      audioBlob = file; previewAud.src = URL.createObjectURL(file); previewAud.style.display = 'block';
+      document.getElementById('submit-status').textContent = '';
+    }
+  };
+
+  // ── SUBMIT ──
+  document.getElementById('submit-memory').onclick = async () => {
+    const name = document.getElementById('mem-name').value.trim();
+    const rel  = document.getElementById('mem-rel').value.trim();
+    const text = document.getElementById('mem-text').value.trim();
+    const statusEl = document.getElementById('submit-status');
+    const submitBtn = document.getElementById('submit-memory');
+    if (!name) { statusEl.textContent = 'Please enter your name.'; return; }
+    if (!text && !audioBlob) { statusEl.textContent = 'Please write a memory or record a voice note.'; return; }
+    statusEl.textContent = 'Saving…'; submitBtn.disabled = true;
+    let audio_url = null;
+    if (audioBlob) {
+      const mimeToExt = {'audio/ogg':'ogg','audio/opus':'opus','audio/webm':'webm','audio/mp4':'m4a','audio/mpeg':'mp3','audio/wav':'wav'};
+      const mime = audioBlob.type || 'audio/webm';
+      const ext = mimeToExt[mime] || 'webm';
+      const path = `voice-notes/${Date.now()}-${name.replace(/\s+/g,'-').toLowerCase()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('memories').upload(path, audioBlob, { contentType: mime });
+      if (upErr) { statusEl.textContent = 'Audio upload failed — please try again.'; submitBtn.disabled = false; return; }
+      audio_url = sb.storage.from('memories').getPublicUrl(path).data.publicUrl;
+    }
+    const { error } = await sb.from('tributes').insert({ name, relationship: rel, message: text, audio_url });
+    if (error) { statusEl.textContent = 'Something went wrong — please try again.'; submitBtn.disabled = false; return; }
+    statusEl.textContent = 'Thank you for sharing this memory.';
+    document.getElementById('mem-name').value = '';
+    document.getElementById('mem-rel').value = '';
+    document.getElementById('mem-text').value = '';
+    previewAud.style.display = 'none'; previewAud.src = ''; audioBlob = null;
+    submitBtn.disabled = false;
+    loadMemories();
+  };
+</script>
+</body>
+</html>

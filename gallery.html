@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery · Olawuyi Victoria Ayodele Arinke</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="gallery.html" class="active">Gallery</a>
+  <a href="recordings.html">Recordings</a>
+  <a href="timeline.html">Timeline</a>
+  <a href="memories.html">Memories</a>
+  <a href="foundation.html">Foundation</a>
+</nav>
+
+<div class="page-hero">
+  <p class="page-label">Photographs</p>
+  <h1 class="page-title">A Life in Pictures</h1>
+  <div class="page-divider"></div>
+</div>
+
+<div class="content">
+  <div class="gallery-grid">
+    <div class="gallery-item"><img src="ChatGPT Image Jun 29, 2026, 09_08_00 AM (1).png" alt="Mama"></div>
+    <div class="gallery-item"><img src="ChatGPT Image Jun 29, 2026, 08_45_25 AM.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-28 233738.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-28 233801.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000029.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000054.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000121.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000156.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000214.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000236.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000256.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000312.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000347.png" alt="Mama"></div>
+    <div class="gallery-item"><img src="Screenshot 2026-06-29 000451.png" alt="Mama"></div>
+  </div>
+</div>
+
+<div id="lightbox" role="dialog" aria-modal="true">
+  <button id="lightbox-close" aria-label="Close">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<footer>
+  <p>In loving memory of <span>Olawuyi Victoria Ayodele Arinke</span></p>
+  <p style="margin-top:0.4rem;font-size:0.75rem;letter-spacing:0.12em;">23 May 1942 &nbsp;·&nbsp; 28 June 2014</p>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="recordings.html">Recordings</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="memories.html">Memories</a>
+    <a href="foundation.html">Foundation</a>
+  </nav>
+</footer>
+
+<script>
+  const lightbox    = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  document.getElementById('lightbox-close').onclick = () => lightbox.classList.remove('open');
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('open'); });
+  document.querySelectorAll('.gallery-item img').forEach(img => {
+    img.parentElement.addEventListener('click', () => {
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightbox.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>

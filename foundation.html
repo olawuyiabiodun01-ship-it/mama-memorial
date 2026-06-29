@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayodele Arinke Foundation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── FOUNDATION HERO ── */
+    .foundation-hero {
+      min-height: 55vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .foundation-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 40%, rgba(200,169,110,0.1) 0%, transparent 65%),
+        linear-gradient(to bottom, transparent 55%, var(--bg) 100%);
+      pointer-events: none;
+    }
+    .foundation-logo {
+      width: 120px; height: 120px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 2rem;
+      position: relative; z-index: 1;
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--cream-dim);
+    }
+    .foundation-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .foundation-name {
+      font-family: 'Cormorant SC', serif;
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 300;
+      letter-spacing: 0.07em;
+      color: var(--cream);
+      line-height: 1.2;
+      position: relative; z-index: 1;
+    }
+    .foundation-tagline {
+      font-style: italic;
+      font-size: 1rem;
+      color: var(--cream-dim);
+      margin-top: 1.2rem;
+      max-width: 520px;
+      position: relative; z-index: 1;
+    }
+
+    /* ── MISSION ── */
+    .mission-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+      max-width: 780px;
+      margin: 0 auto 5rem;
+      text-align: center;
+      position: relative;
+    }
+    .mission-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 60px; height: 1px;
+      background: var(--gold);
+    }
+    .mission-box p {
+      font-size: 1.05rem;
+      color: var(--cream-dim);
+      line-height: 1.85;
+      font-style: italic;
+    }
+    .mission-box p span { color: var(--gold); font-style: normal; }
+
+    /* ── EVENT CARDS ── */
+    .events-list { display: flex; flex-direction: column; gap: 4rem; }
+    .event-card {
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .event-header {
+      background: var(--bg2);
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+    }
+    .event-year {
+      font-family: 'Cormorant SC', serif;
+      font-size: 3rem;
+      font-weight: 300;
+      color: var(--gold);
+      letter-spacing: 0.06em;
+      line-height: 1;
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+    .event-info { flex: 1; }
+    .event-title {
+      font-family: 'Cormorant SC', serif;
+      font-size: 1.4rem;
+      font-weight: 300;
+      color: var(--cream);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .event-story {
+      font-size: 0.95rem;
+      color: var(--cream-dim);
+      line-height: 1.8;
+      font-style: italic;
+    }
+    .event-photos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1px;
+      background: var(--border);
+    }
+    .event-photo {
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg3);
+    }
+    .event-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s, filter 0.4s;
+      filter: brightness(0.85) sepia(0.08);
+    }
+    .event-photo:hover img { transform: scale(1.05); filter: brightness(1) sepia(0); }
+
+    /* submit photos strip */
+    .event-footer {
+      padding: 1.2rem 2rem;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .event-footer p {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      color: var(--cream-dim);
+      flex: 1;
+    }
+
+    /* ── ADD EVENT FORM (admin) ── */
+    .add-event-wrap {
+      margin-top: 4rem;
+      border-top: 1px solid var(--border);
+      padding-top: 3rem;
+    }
+    .add-event-wrap h3 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.14em;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    /* ── SUBMIT PHOTOS MODAL ── */
+    #photo-modal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    #photo-modal.open { display: flex; }
+    .modal-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      max-width: 540px;
+      width: 100%;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1.2rem;
+      background: none; border: none;
+      color: var(--cream-dim);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--gold); }
+    .modal-box h3 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 1rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .event-header { flex-direction: column; gap: 1rem; }
+      .event-year { font-size: 2rem; }
+      .mission-box { padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Home</a>
+  <a href="gallery.html">Gallery</a>
+  <a href="recordings.html">Recordings</a>
+  <a href="timeline.html">Timeline</a>
+  <a href="memories.html">Memories</a>
+  <a href="foundation.html" class="active">Foundation</a>
+</nav>
+
+<!-- HERO -->
+<div class="foundation-hero">
+  <div class="foundation-logo" id="foundation-logo">
+    <!--
+      Add your logo by dropping the file into the MAMA-MEMORIAL folder,
+      then replace this placeholder with:
+      <img src="logo.png" alt="Ayodele Arinke Foundation">
+    -->
+    ADD LOGO
+  </div>
+  <h1 class="foundation-name">Ayodele Arinke<br>Foundation</h1>
+  <p class="foundation-tagline">Extending a hand of love, one life at a time.</p>
+  <div class="page-divider"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- Mission -->
+  <div class="mission-box">
+    <p>
+      In honour of <span>Olawuyi Victoria Ayodele Arinke</span>, whose life was a testimony of
+      generosity and love, we gather every year to reach out to people around us —
+      extending a hand of love through gifts, care, and presence.
+      This is her legacy, kept alive by those who loved her.
+    </p>
+  </div>
+
+  <!-- Events loaded from Supabase -->
+  <p class="section-label">Annual Outreach</p>
+  <h2 class="section-title">Events &amp; Impact</h2>
+  <div class="section-rule"></div>
+
+  <div class="events-list" id="events-list">
+    <div style="color:var(--cream-dim);font-style:italic;text-align:center;padding:2rem;">Loading events…</div>
+  </div>
+
+  <!-- Admin: Add new event -->
+  <div class="add-event-wrap">
+    <h3>&#128274; Admin — Add a New Event</h3>
+    <div class="form-box" id="add-event-form" style="display:none">
+      <h3>New Foundation Event</h3>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="ev-year">Year</label>
+          <input type="number" id="ev-year" placeholder="e.g. 2024" min="2014" max="2100">
+        </div>
+        <div class="form-field">
+          <label for="ev-title">Event Title</label>
+          <input type="text" id="ev-title" placeholder="e.g. 10th Remembrance Outreach">
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="ev-story">Story / Description</label>
+        <textarea id="ev-story" style="min-height:140px;" placeholder="Describe the event — who was reached, what was given, how it felt…"></textarea>
+      </div>
+      <button class="btn primary" id="submit-event" style="width:100%;padding:0.85rem;">Add This Event</button>
+      <p class="submit-status" id="event-status"></p>
+    </div>
+    <div style="text-align:center" id="unlock-event-wrap">
+      <button class="btn" onclick="unlockEvent()">Unlock to Add Event</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" role="dialog">
+  <button id="lightbox-close">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- Submit photos modal -->
+<div id="photo-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closePhotoModal()">&times;</button>
+    <h3>Submit Photos</h3>
+    <input type="hidden" id="modal-event-id">
+    <div class="form-field">
+      <label for="photo-name">Your Name</label>
+      <input type="text" id="photo-name" placeholder="e.g. Adetunji">
+    </div>
+    <div class="form-field">
+      <label for="photo-caption">Caption (optional)</label>
+      <input type="text" id="photo-caption" placeholder="A short description of the photo">
+    </div>
+    <div class="form-field">
+      <label for="photo-file">Select Photo</label>
+      <input type="file" id="photo-file" accept="image/*" style="background:var(--bg3);border:1px solid var(--border);color:var(--cream);padding:0.7rem 1rem;">
+    </div>
+    <button class="btn primary" onclick="submitPhoto()" style="width:100%;padding:0.85rem;">Upload Photo</button>
+    <p class="submit-status" id="photo-status"></p>
+  </div>
+</div>
+
+<footer>
+  <p>In loving memory of <span>Olawuyi Victoria Ayodele Arinke</span></p>
+  <p style="margin-top:0.4rem;font-size:0.75rem;letter-spacing:0.12em;">23 May 1942 &nbsp;·&nbsp; 28 June 2014</p>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="recordings.html">Recordings</a>
+    <a href="timeline.html">Timeline</a>
+    <a href="memories.html">Memories</a>
+  </nav>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL  = 'https://apvslzcldlqzskawpzzk.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_8hgovw8SLg4S4ZR2-p26Sg_v3CGpTPg';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── LIGHTBOX ──
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  document.getElementById('lightbox-close').onclick = () => lightbox.classList.remove('open');
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { lightbox.classList.remove('open'); closePhotoModal(); } });
+
+  // ── LOAD EVENTS ──
+  async function loadEvents() {
+    const list = document.getElementById('events-list');
+    const { data: events } = await sb.from('foundation_events').select('*').order('year', { ascending: false });
+
+    if (!events || !events.length) {
+      list.innerHTML = '<div style="color:var(--cream-dim);font-style:italic;text-align:center;padding:2rem;">No events yet — add the first one below.</div>';
+      return;
+    }
+
+    const photoResults = await Promise.all(
+      events.map(ev => sb.from('foundation_photos').select('*').eq('event_id', ev.id).order('created_at', { ascending: true }))
+    );
+
+    list.innerHTML = events.map((ev, i) => {
+      const photos = photoResults[i].data || [];
+      return `
+        <div class="event-card">
+          <div class="event-header">
+            <div class="event-year">${ev.year}</div>
+            <div class="event-info">
+              <h3 class="event-title">${escHtml(ev.title)}</h3>
+              ${ev.story ? `<p class="event-story">${escHtml(ev.story)}</p>` : ''}
+            </div>
+          </div>
+          ${photos.length ? `
+            <div class="event-photos">
+              ${photos.map(p => `
+                <div class="event-photo" onclick="openLightbox('${escHtml(p.photo_url)}')">
+                  <img src="${escHtml(p.photo_url)}" alt="${escHtml(p.caption || '')}">
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+          <div class="event-footer">
+            <p>${photos.length ? photos.length + ' photo' + (photos.length > 1 ? 's' : '') + ' from this event' : 'No photos yet — be the first to add one'}</p>
+            <button class="btn" onclick="openPhotoModal('${ev.id}')">+ Add Photo</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  loadEvents();
+
+  function openLightbox(src) {
+    lightboxImg.src = src;
+    lightbox.classList.add('open');
+  }
+
+  // ── PHOTO MODAL ──
+  function openPhotoModal(eventId) {
+    document.getElementById('modal-event-id').value = eventId;
+    document.getElementById('photo-status').textContent = '';
+    document.getElementById('photo-name').value = '';
+    document.getElementById('photo-caption').value = '';
+    document.getElementById('photo-file').value = '';
+    document.getElementById('photo-modal').classList.add('open');
+  }
+  function closePhotoModal() {
+    document.getElementById('photo-modal').classList.remove('open');
+  }
+
+  async function submitPhoto() {
+    const eventId = document.getElementById('modal-event-id').value;
+    const name    = document.getElementById('photo-name').value.trim();
+    const caption = document.getElementById('photo-caption').value.trim();
+    const file    = document.getElementById('photo-file').files[0];
+    const status  = document.getElementById('photo-status');
+
+    if (!name)  { status.textContent = 'Please enter your name.'; return; }
+    if (!file)  { status.textContent = 'Please select a photo.'; return; }
+
+    status.textContent = 'Uploading…';
+    const ext  = file.name.split('.').pop();
+    const path = `foundation/${eventId}/${Date.now()}-${name.replace(/\s+/g,'-').toLowerCase()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('memories').upload(path, file, { contentType: file.type });
+    if (upErr) { status.textContent = 'Upload failed — please try again.'; return; }
+
+    const photo_url = sb.storage.from('memories').getPublicUrl(path).data.publicUrl;
+    const { error } = await sb.from('foundation_photos').insert({ event_id: eventId, photo_url, caption, submitted_by: name });
+    if (error) { status.textContent = 'Something went wrong — please try again.'; return; }
+
+    status.textContent = 'Photo added!';
+    setTimeout(() => { closePhotoModal(); loadEvents(); }, 1200);
+  }
+
+  // ── ADMIN: ADD EVENT ──
+  function unlockEvent() {
+    const pwd = prompt('Enter admin password:');
+    if (!pwd) return;
+    if (pwd !== 'mama2014') { alert('Incorrect password.'); return; }
+    document.getElementById('unlock-event-wrap').style.display = 'none';
+    document.getElementById('add-event-form').style.display = 'block';
+  }
+
+  document.getElementById('submit-event').onclick = async () => {
+    const year   = parseInt(document.getElementById('ev-year').value);
+    const title  = document.getElementById('ev-title').value.trim();
+    const story  = document.getElementById('ev-story').value.trim();
+    const status = document.getElementById('event-status');
+    const btn    = document.getElementById('submit-event');
+
+    if (!year || !title) { status.textContent = 'Please fill in the year and title.'; return; }
+
+    status.textContent = 'Saving…'; btn.disabled = true;
+    const { error } = await sb.from('foundation_events').insert({ year, title, story });
+    if (error) { status.textContent = 'Something went wrong — try again.'; btn.disabled = false; return; }
+
+    status.textContent = 'Event added!';
+    document.getElementById('ev-year').value = '';
+    document.getElementById('ev-title').value = '';
+    document.getElementById('ev-story').value = '';
+    btn.disabled = false;
+    loadEvents();
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  };
+</script>
+</body>
+</html>
