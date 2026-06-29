@@ -321,8 +321,9 @@
 </footer>
 
 <!-- ══ HYMN PLAYER ══ -->
+<audio id="hymn-audio" src="mama-hymn.mp3" loop preload="none"></audio>
 <div id="hymn-player">
-  <button id="hymn-btn" title="Toggle hymn">♪</button>
+  <button id="hymn-btn" title="Play hymn">♪</button>
   <span class="hymn-label">'Tis Love That Makes Us Happy</span>
   <span class="hymn-note">— her favourite hymn</span>
 </div>
@@ -356,102 +357,33 @@
 })();
 
 
-// ── HYMN (Web Audio API) ──
-// Notes for 'Tis Love That Makes Us Happy (SDA Hymnal 440) in D major
-const HYMN_NOTES = [
-  // Verse: "'Tis love that makes us happy"
-  [293.66,0.4],[369.99,0.4],[369.99,0.4],[415.30,0.4],[369.99,0.4],[293.66,0.4],[246.94,0.4],[220.00,0.8],
-  // "love that smooths the way"
-  [246.94,0.4],[293.66,0.4],[329.63,0.4],[369.99,0.4],[329.63,0.8],[293.66,0.8],
-  // "It helps us mind, it makes us kind"
-  [369.99,0.4],[415.30,0.4],[493.88,0.4],[440.00,0.4],[415.30,0.4],[369.99,0.4],[329.63,0.4],[293.66,0.8],
-  // "to others every day"
-  [246.94,0.4],[220.00,0.4],[246.94,0.4],[293.66,0.8],[293.66,1.2],
-  // Refrain: "God is love; we're His little children"
-  [369.99,0.4],[440.00,0.4],[493.88,0.4],[440.00,0.4],[415.30,0.4],[369.99,0.4],[329.63,0.4],[293.66,0.8],
-  [246.94,0.4],[293.66,0.4],[329.63,0.8],[293.66,1.2],
-  // "God is love; we would be like Him"
-  [369.99,0.4],[440.00,0.4],[493.88,0.4],[440.00,0.4],[415.30,0.8],[369.99,0.8],
-  // "'Tis love that makes us happy"
-  [293.66,0.4],[369.99,0.4],[369.99,0.4],[415.30,0.4],[369.99,0.4],[293.66,0.4],[246.94,0.4],[220.00,0.8],
-  // close
-  [246.94,0.4],[293.66,0.4],[329.63,0.4],[369.99,0.8],[293.66,1.6],
-];
+// ── HYMN PLAYER ──
+const audio    = document.getElementById('hymn-audio');
+const hymnBtn  = document.getElementById('hymn-btn');
+const player   = document.getElementById('hymn-player');
 
-let audioCtx = null;
-let hymnPlaying = false;
-let hymnNodes = [];
-let hymnTimeout = null;
-let hymnLoopIdx = 0;
+audio.volume = 0.45;
 
-function initAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-}
-
-function playNote(freq, duration, startTime) {
-  const osc  = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-  gain.gain.setValueAtTime(0, startTime);
-  gain.gain.linearRampToValueAtTime(0.08, startTime + 0.04);
-  gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.02);
-  osc.start(startTime);
-  osc.stop(startTime + duration);
-  hymnNodes.push(osc);
-}
-
-function scheduleHymn() {
-  if (!hymnPlaying) return;
-  let t = audioCtx.currentTime + 0.05;
-  const beat = 0.52;
-  HYMN_NOTES.forEach(([freq, beats]) => {
-    playNote(freq, beats * beat * 0.9, t);
-    t += beats * beat;
-  });
-  // loop after all notes finish + short pause
-  const totalDur = HYMN_NOTES.reduce((s, [, b]) => s + b * beat, 0);
-  hymnTimeout = setTimeout(scheduleHymn, (totalDur + 1) * 1000);
-}
-
-function stopHymn() {
-  clearTimeout(hymnTimeout);
-  hymnNodes.forEach(n => { try { n.stop(); } catch(e){} });
-  hymnNodes = [];
-}
-
-const hymnBtn = document.getElementById('hymn-btn');
 hymnBtn.addEventListener('click', () => {
-  initAudio();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  if (hymnPlaying) {
-    hymnPlaying = false;
-    stopHymn();
-    hymnBtn.textContent = '♪';
-    hymnBtn.title = 'Play hymn';
-  } else {
-    hymnPlaying = true;
-    scheduleHymn();
+  if (audio.paused) {
+    audio.play();
     hymnBtn.textContent = '■';
     hymnBtn.title = 'Stop hymn';
+  } else {
+    audio.pause();
+    hymnBtn.textContent = '♪';
+    hymnBtn.title = 'Play hymn';
   }
 });
 
 
 // ── SPLASH ──
 (function () {
-  const splash = document.getElementById('splash');
+  const splash   = document.getElementById('splash');
   const enterBtn = document.getElementById('splash-enter');
-  const player = document.getElementById('hymn-player');
 
   function dismiss() {
-    // start hymn on user gesture
-    initAudio();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    hymnPlaying = true;
-    scheduleHymn();
+    audio.play().catch(() => {});
     hymnBtn.textContent = '■';
     hymnBtn.title = 'Stop hymn';
 
