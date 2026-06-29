@@ -347,6 +347,19 @@
       </div>
     </div>
 
+    <!-- ── FAMILY WALL ── -->
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>Family Wall — PINs</h2>
+      </div>
+      <div class="admin-section-body">
+        <p style="font-size:0.8rem;color:var(--cream-dim);font-style:italic;margin-bottom:1.2rem;">
+          All family wall posts with their delete PINs. Share a PIN with a family member if they forgot theirs.
+        </p>
+        <div id="wall-list"><div class="empty-state">Loading…</div></div>
+      </div>
+    </div>
+
     <!-- ── FAMILY MEMORIES ── -->
     <div class="admin-section">
       <div class="admin-section-head">
@@ -403,7 +416,39 @@
     loadAll();
   }
 
-  function loadAll() { loadEvents(); loadMemories(); }
+  function loadAll() { loadEvents(); loadMemories(); loadWallPins(); }
+
+  // ══════════════════════════════════════
+  // ── FAMILY WALL PINS ──
+  // ══════════════════════════════════════
+  async function loadWallPins() {
+    const list = document.getElementById('wall-list');
+    const { data } = await sb.from('family_media').select('*').order('created_at', { ascending: false });
+    if (!data || !data.length) {
+      list.innerHTML = '<div class="empty-state">No family wall posts yet.</div>'; return;
+    }
+    list.innerHTML = data.map(item => `
+      <div class="memory-row" data-id="${item.id}">
+        <div class="memory-row-info">
+          <p class="memory-row-name">${escHtml(item.name || 'Unknown')}</p>
+          <p class="memory-row-rel">${item.media_type === 'video' ? '🎬 Video' : '🖼 Photo'}${item.caption ? ' · ' + escHtml(item.caption) : ''}</p>
+          <p style="margin-top:0.35rem;font-size:0.82rem;color:var(--cream);">
+            PIN: <strong style="font-family:monospace;letter-spacing:0.2em;color:var(--gold);font-size:1rem;">${escHtml(item.pin || '—')}</strong>
+          </p>
+        </div>
+        <div class="memory-row-actions">
+          <button class="delete-btn" onclick="deleteWallItem('${item.id}','${escHtml(item.storage_path||'')}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function deleteWallItem(id, storagePath) {
+    if (!confirm('Delete this family wall post? This cannot be undone.')) return;
+    if (storagePath) await sb.storage.from('memories').remove([storagePath]);
+    await sb.from('family_media').delete().eq('id', id);
+    loadWallPins();
+  }
 
   // ══════════════════════════════════════
   // ── FOUNDATION EVENTS ──
