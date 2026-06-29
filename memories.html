@@ -95,7 +95,6 @@
         ${m.audio_url ? `<audio class="memory-audio" controls src="${escHtml(m.audio_url)}"></audio>` : ''}
         <p class="memory-author">${escHtml(m.name || 'Anonymous')}</p>
         ${m.relationship ? `<p class="memory-rel">${escHtml(m.relationship)}</p>` : ''}
-        <button class="delete-btn" onclick="deleteMemory('${m.id}')">&#128465; Delete</button>
       </div>
     `).join('');
 
@@ -115,69 +114,6 @@
     const el = document.getElementById('msg-' + id);
     const btn = document.getElementById('rm-' + id);
     btn.textContent = el.classList.toggle('expanded') ? 'Read less' : 'Read more';
-  }
-
-  // ── ARRANGE MODE ──
-  let arrangeActive = false, dragSrc = null;
-
-  function unlockArrange() {
-    const pwd = prompt('Enter admin password:');
-    if (!pwd) return;
-    if (pwd !== 'mama2014') { alert('Incorrect password.'); return; }
-    document.getElementById('unlock-arrange-btn').style.display = 'none';
-    document.getElementById('arrange-bar').style.display = 'flex';
-  }
-  function toggleArrange() {
-    const grid = document.getElementById('memories-grid');
-    const btn = document.getElementById('arrange-btn');
-    const hint = document.getElementById('arrange-hint');
-    const saveBtn = document.getElementById('save-order-btn');
-    arrangeActive = !arrangeActive;
-    grid.classList.toggle('arrange-mode', arrangeActive);
-    btn.textContent = arrangeActive ? '✕ Cancel' : '⠿ Arrange Memories';
-    hint.textContent = arrangeActive ? 'Drag cards to reorder, then click Save Order.' : '';
-    saveBtn.style.display = arrangeActive ? 'inline-block' : 'none';
-    grid.querySelectorAll('.memory-card').forEach(card => {
-      card.setAttribute('draggable', arrangeActive ? 'true' : 'false');
-      if (arrangeActive) {
-        card.addEventListener('dragstart', onDragStart);
-        card.addEventListener('dragover', onDragOver);
-        card.addEventListener('dragleave', onDragLeave);
-        card.addEventListener('drop', onDrop);
-        card.addEventListener('dragend', onDragEnd);
-      } else {
-        card.removeEventListener('dragstart', onDragStart);
-        card.removeEventListener('dragover', onDragOver);
-        card.removeEventListener('dragleave', onDragLeave);
-        card.removeEventListener('drop', onDrop);
-        card.removeEventListener('dragend', onDragEnd);
-      }
-    });
-  }
-  function onDragStart(e) { dragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
-  function onDragOver(e) { e.preventDefault(); this.classList.add('drag-over'); }
-  function onDragLeave() { this.classList.remove('drag-over'); }
-  function onDragEnd() { this.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }
-  function onDrop(e) {
-    e.preventDefault(); this.classList.remove('drag-over');
-    if (dragSrc === this) return;
-    const cards = [...document.getElementById('memories-grid').querySelectorAll('.memory-card')];
-    cards.indexOf(dragSrc) < cards.indexOf(this) ? this.after(dragSrc) : this.before(dragSrc);
-  }
-  async function saveOrder() {
-    const cards = [...document.getElementById('memories-grid').querySelectorAll('.memory-card')];
-    await Promise.all(cards.map((c, i) => sb.from('tributes').update({ sort_order: i }).eq('id', c.dataset.id)));
-    document.getElementById('arrange-hint').textContent = 'Order saved!';
-    setTimeout(() => { document.getElementById('arrange-hint').textContent = 'Drag cards to reorder, then click Save Order.'; }, 2000);
-  }
-
-  // ── DELETE ──
-  async function deleteMemory(id) {
-    const pwd = prompt('Enter admin password to delete:');
-    if (!pwd) return;
-    if (pwd !== 'mama2014') { alert('Incorrect password.'); return; }
-    await sb.from('tributes').delete().eq('id', id);
-    loadMemories();
   }
 
   // ── VOICE RECORDER ──
