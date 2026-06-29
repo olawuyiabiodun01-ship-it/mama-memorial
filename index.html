@@ -309,12 +309,33 @@
     }
 
     /* ── MEMORIES ── */
+    .arrange-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .arrange-bar p {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      color: var(--cream-dim);
+    }
     .memories-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.5rem;
       margin-bottom: 3rem;
     }
+    .memories-grid.arrange-mode .memory-card {
+      cursor: grab;
+      border-color: rgba(200,169,110,0.4);
+      outline: 1px dashed rgba(200,169,110,0.25);
+    }
+    .memories-grid.arrange-mode .memory-card:active { cursor: grabbing; }
+    .memory-card.dragging { opacity: 0.4; }
+    .memory-card.drag-over { outline: 2px solid var(--gold); }
     .memory-card {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -697,6 +718,14 @@
   <h2 class="section-title">Memories &amp; Tributes</h2>
   <div class="section-rule"></div>
 
+  <!-- Arrange bar — only visible to admin -->
+  <div class="arrange-bar" id="arrange-bar" style="display:none">
+    <button class="btn" id="arrange-btn" onclick="toggleArrange()">&#9776; Arrange Memories</button>
+    <p id="arrange-hint"></p>
+    <button class="btn primary" id="save-order-btn" onclick="saveOrder()" style="display:none">Save Order</button>
+  </div>
+  <button class="btn" id="unlock-arrange-btn" onclick="unlockArrange()" style="margin-bottom:1.5rem;">&#128274; Arrange Memories</button>
+
   <!-- Memories loaded from Supabase appear here -->
   <div class="memories-grid" id="memories-grid">
     <div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:2rem 1rem;">
@@ -789,6 +818,7 @@
     const { data, error } = await sb
       .from('tributes')
       .select('*')
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false });
 
     if (error || !data || !data.length) {
@@ -797,7 +827,7 @@
     }
 
     grid.innerHTML = data.map(m => `
-      <div class="memory-card">
+      <div class="memory-card" data-id="${m.id}">
         ${m.message ? `<p class="memory-text" id="msg-${m.id}">${escHtml(m.message)}</p>
         <button class="read-more-btn" id="rm-${m.id}" onclick="toggleReadMore('${m.id}')">Read more</button>` : ''}
         ${m.audio_url ? `<audio class="memory-audio" controls src="${escHtml(m.audio_url)}"></audio>` : ''}
@@ -816,6 +846,73 @@
         btn.classList.add('visible');
       }
     });
+  }
+
+  // ── ARRANGE MODE ─────────────────────────────────────────────────────────
+  let arrangeActive = false;
+  let dragSrc = null;
+
+  function unlockArrange() {
+    const pwd = prompt('Enter admin password to arrange memories:');
+    if (pwd === null) return;
+    if (pwd !== 'mama2014') { alert('Incorrect password.'); return; }
+    document.getElementById('unlock-arrange-btn').style.display = 'none';
+    document.getElementById('arrange-bar').style.display = 'flex';
+  }
+
+  function toggleArrange() {
+    const grid    = document.getElementById('memories-grid');
+    const btn     = document.getElementById('arrange-btn');
+    const hint    = document.getElementById('arrange-hint');
+    const saveBtn = document.getElementById('save-order-btn');
+    arrangeActive = !arrangeActive;
+    grid.classList.toggle('arrange-mode', arrangeActive);
+    btn.textContent   = arrangeActive ? '✕ Cancel' : '⠿ Arrange Memories';
+    hint.textContent  = arrangeActive ? 'Drag cards to reorder, then click Save Order.' : '';
+    saveBtn.style.display = arrangeActive ? 'inline-block' : 'none';
+
+    grid.querySelectorAll('.memory-card').forEach(card => {
+      if (arrangeActive) {
+        card.setAttribute('draggable', 'true');
+        card.addEventListener('dragstart', onDragStart);
+        card.addEventListener('dragover',  onDragOver);
+        card.addEventListener('dragleave', onDragLeave);
+        card.addEventListener('drop',      onDrop);
+        card.addEventListener('dragend',   onDragEnd);
+      } else {
+        card.setAttribute('draggable', 'false');
+        card.removeEventListener('dragstart', onDragStart);
+        card.removeEventListener('dragover',  onDragOver);
+        card.removeEventListener('dragleave', onDragLeave);
+        card.removeEventListener('drop',      onDrop);
+        card.removeEventListener('dragend',   onDragEnd);
+      }
+    });
+  }
+
+  function onDragStart(e) { dragSrc = this; this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+  function onDragOver(e)  { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; this.classList.add('drag-over'); }
+  function onDragLeave()  { this.classList.remove('drag-over'); }
+  function onDragEnd()    { this.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }
+  function onDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    if (dragSrc === this) return;
+    const grid = document.getElementById('memories-grid');
+    const cards = [...grid.querySelectorAll('.memory-card')];
+    const srcIdx  = cards.indexOf(dragSrc);
+    const destIdx = cards.indexOf(this);
+    if (srcIdx < destIdx) this.after(dragSrc);
+    else this.before(dragSrc);
+  }
+
+  async function saveOrder() {
+    const grid  = document.getElementById('memories-grid');
+    const cards = [...grid.querySelectorAll('.memory-card')];
+    const updates = cards.map((card, i) => sb.from('tributes').update({ sort_order: i }).eq('id', card.dataset.id));
+    await Promise.all(updates);
+    document.getElementById('arrange-hint').textContent = 'Order saved!';
+    setTimeout(() => { document.getElementById('arrange-hint').textContent = 'Drag cards to reorder, then click Save Order.'; }, 2000);
   }
 
   function toggleReadMore(id) {
