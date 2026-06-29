@@ -80,9 +80,15 @@
   // ── LOAD MEMORIES ──
   async function loadMemories() {
     const grid = document.getElementById('memories-grid');
-    const { data, error } = await sb.from('tributes').select('*')
-      .order('sort_order', { ascending: true })
+    let { data, error } = await sb.from('tributes').select('*')
+      .order('sort_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false });
+
+    // Fallback if sort_order column doesn't exist yet
+    if (error) {
+      ({ data, error } = await sb.from('tributes').select('*')
+        .order('created_at', { ascending: false }));
+    }
 
     if (error || !data || !data.length) {
       grid.innerHTML = '<div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:2rem 1rem;">Be the first to share a memory.</div>';
