@@ -9,6 +9,7 @@
     { href: 'timeline.html',    label: 'Timeline',    icon: '◈' },
     { href: 'memories.html',    label: 'Memories',    icon: '◇' },
     { href: 'family-wall.html', label: 'Family Wall', icon: '◈' },
+    { href: 'tributes.html',    label: 'Tributes',    icon: '✦' },
     { href: 'foundation.html',  label: 'Foundation',  icon: '❋' },
   ];
 
