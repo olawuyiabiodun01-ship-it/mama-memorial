@@ -336,9 +336,26 @@
       color: var(--cream);
       font-size: 0.95rem;
       line-height: 1.75;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       padding-top: 0.3rem;
+      max-height: 5.25rem;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
     }
+    .memory-text.expanded { max-height: 1000px; }
+    .read-more-btn {
+      background: none;
+      border: none;
+      color: var(--gold);
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 0.8rem;
+      display: none;
+    }
+    .read-more-btn.visible { display: inline-block; }
     .memory-author {
       font-family: 'Cormorant SC', serif;
       font-size: 0.72rem;
@@ -781,13 +798,31 @@
 
     grid.innerHTML = data.map(m => `
       <div class="memory-card">
-        ${m.message ? `<p class="memory-text">${escHtml(m.message)}</p>` : ''}
+        ${m.message ? `<p class="memory-text" id="msg-${m.id}">${escHtml(m.message)}</p>
+        <button class="read-more-btn" id="rm-${m.id}" onclick="toggleReadMore('${m.id}')">Read more</button>` : ''}
         ${m.audio_url ? `<audio class="memory-audio" controls src="${escHtml(m.audio_url)}"></audio>` : ''}
         <p class="memory-author">${escHtml(m.name || 'Anonymous')}</p>
         ${m.relationship ? `<p class="memory-rel">${escHtml(m.relationship)}</p>` : ''}
         <button class="delete-btn" onclick="deleteMemory('${m.id}')">&#128465; Delete</button>
       </div>
     `).join('');
+
+    // Show "Read more" only for messages that overflow
+    data.forEach(m => {
+      if (!m.message) return;
+      const el = document.getElementById('msg-' + m.id);
+      const btn = document.getElementById('rm-' + m.id);
+      if (el && btn && el.scrollHeight > el.clientHeight + 2) {
+        btn.classList.add('visible');
+      }
+    });
+  }
+
+  function toggleReadMore(id) {
+    const el  = document.getElementById('msg-' + id);
+    const btn = document.getElementById('rm-' + id);
+    const expanded = el.classList.toggle('expanded');
+    btn.textContent = expanded ? 'Read less' : 'Read more';
   }
 
   async function deleteMemory(id) {
