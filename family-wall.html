@@ -237,12 +237,12 @@
 
     <div class="form-field">
       <label>Photo or Video</label>
-      <div class="file-drop-area" id="drop-area">
-        <input type="file" id="fw-file" accept="image/*,video/*" onchange="onFileSelect(this)">
+      <input type="file" id="fw-file" accept="image/*,video/*" style="display:none" onchange="onFileSelect(this)">
+      <label for="fw-file" class="file-drop-area" id="drop-area">
         <div class="file-drop-icon">⊕</div>
-        <p class="file-drop-text">Tap to choose or drag a photo / video here</p>
+        <p class="file-drop-text">Tap to choose a photo or video</p>
         <p class="file-drop-name" id="file-name-display"></p>
-      </div>
+      </label>
       <div class="preview-wrap" id="preview-wrap">
         <img id="preview-img" src="" alt="" style="display:none;">
         <video id="preview-vid" controls style="display:none;"></video>
