@@ -94,4 +94,28 @@
   toggle.addEventListener('click', () => sidebar.classList.contains('open') ? close() : open());
   overlay.addEventListener('click', close);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+
+  // ── SWIPE NAVIGATION ──
+  const pages = links.map(l => l.href);
+  const currentIdx = pages.indexOf(page);
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (sidebar.classList.contains('open')) return; // don't swipe while sidebar is open
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return; // too short or mostly vertical
+    if (dx < 0 && currentIdx < pages.length - 1) {
+      window.location.href = pages[currentIdx + 1]; // swipe left → next page
+    } else if (dx > 0 && currentIdx > 0) {
+      window.location.href = pages[currentIdx - 1]; // swipe right → previous page
+    }
+  }, { passive: true });
 })();
