@@ -321,7 +321,7 @@
 </footer>
 
 <!-- ══ HYMN PLAYER ══ -->
-<audio id="hymn-audio" src="mama-hymn.mp3" loop preload="none"></audio>
+<audio id="hymn-audio" src="mama-hymn.mp3" preload="none"></audio>
 <div id="hymn-player">
   <button id="hymn-btn" title="Play hymn">♪</button>
   <span class="hymn-label">'Tis Love That Makes Us Happy</span>
@@ -374,6 +374,11 @@ hymnBtn.addEventListener('click', () => {
     hymnBtn.textContent = '♪';
     hymnBtn.title = 'Play hymn';
   }
+});
+
+audio.addEventListener('ended', () => {
+  hymnBtn.textContent = '♪';
+  hymnBtn.title = 'Play hymn';
 });
 
 
