@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,7 +17,9 @@
 </div>
 
 <div class="content">
-  <div class="gallery-grid">
+  <div class="gallery-grid" id="gallery-grid">
+
+    <!-- Existing local photos always show -->
     <div class="gallery-item"><img loading="lazy" src="ChatGPT Image Jun 29, 2026, 09_08_00 AM (1).png" alt="Mama"></div>
     <div class="gallery-item"><img loading="lazy" src="ChatGPT Image Jun 29, 2026, 08_45_25 AM.png" alt="Mama"></div>
     <div class="gallery-item"><img loading="lazy" src="Screenshot 2026-06-28 233738.png" alt="Mama"></div>
@@ -32,6 +34,8 @@
     <div class="gallery-item"><img loading="lazy" src="Screenshot 2026-06-29 000312.png" alt="Mama"></div>
     <div class="gallery-item"><img loading="lazy" src="Screenshot 2026-06-29 000347.png" alt="Mama"></div>
     <div class="gallery-item"><img loading="lazy" src="Screenshot 2026-06-29 000451.png" alt="Mama"></div>
+
+    <!-- Supabase photos injected here by JS -->
   </div>
 </div>
 
@@ -43,14 +47,41 @@
 <footer>
   <p>In loving memory of <span>Olawuyi Victoria Ayodele Arinke</span></p>
   <p style="margin-top:0.4rem;font-size:0.75rem;letter-spacing:0.12em;">23 May 1942 &nbsp;·&nbsp; 28 June 2014</p>
-  </footer>
+</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+  const SUPABASE_URL  = 'https://apvslzcldlqzskawpzzk.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_8hgovw8SLg4S4ZR2-p26Sg_v3CGpTPg';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // Load any admin-uploaded gallery photos from Supabase
+  async function loadGalleryPhotos() {
+    const { data } = await sb.from('gallery_photos').select('*').order('created_at', { ascending: false });
+    if (!data || !data.length) return;
+    const grid = document.getElementById('gallery-grid');
+    data.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'gallery-item';
+      div.innerHTML = `<img loading="lazy" src="${p.url}" alt="${p.caption || 'Mama'}">`;
+      div.addEventListener('click', () => {
+        lightboxImg.src = p.url;
+        lightboxImg.alt = p.caption || '';
+        lightbox.classList.add('open');
+      });
+      grid.appendChild(div);
+    });
+  }
+  loadGalleryPhotos();
+
+  // Lightbox
   const lightbox    = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
   document.getElementById('lightbox-close').onclick = () => lightbox.classList.remove('open');
   lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('open'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') lightbox.classList.remove('open'); });
+
+  // Wire up existing local photos to lightbox
   document.querySelectorAll('.gallery-item img').forEach(img => {
     img.parentElement.addEventListener('click', () => {
       lightboxImg.src = img.src;

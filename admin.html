@@ -313,6 +313,24 @@
 
   <div class="admin-wrap">
 
+    <!-- ── GALLERY ── -->
+    <div class="admin-section">
+      <div class="admin-section-head">
+        <h2>Gallery Photos</h2>
+        <label class="btn" style="cursor:pointer;">
+          + Add Photos
+          <input type="file" accept="image/*" multiple style="display:none" onchange="uploadGalleryPhotos(this)">
+        </label>
+      </div>
+      <div class="admin-section-body">
+        <p style="font-size:0.8rem;color:var(--cream-dim);font-style:italic;margin-bottom:1.2rem;">
+          Photos uploaded here appear in the public Gallery page. Existing local photos are not shown here but remain on the gallery.
+        </p>
+        <div class="photo-thumbs" id="gallery-thumbs" style="margin-bottom:0.8rem;"></div>
+        <p class="submit-status" id="gallery-upload-status"></p>
+      </div>
+    </div>
+
     <!-- ── FOUNDATION EVENTS ── -->
     <div class="admin-section">
       <div class="admin-section-head">
@@ -416,7 +434,75 @@
     loadAll();
   }
 
-  function loadAll() { loadEvents(); loadMemories(); loadWallPins(); }
+  function loadAll() { loadGallery(); loadEvents(); loadMemories(); loadWallPins(); }
+
+  // ══════════════════════════════════════
+  // ── GALLERY ──
+  // ══════════════════════════════════════
+  function compressImage(file, maxPx, quality) {
+    return new Promise(resolve => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width > maxPx || height > maxPx) {
+          const ratio = Math.min(maxPx / width, maxPx / height);
+          width = Math.round(width * ratio); height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
+  async function loadGallery() {
+    const thumbs = document.getElementById('gallery-thumbs');
+    const { data } = await sb.from('gallery_photos').select('*').order('created_at', { ascending: false });
+    if (!data || !data.length) {
+      thumbs.innerHTML = '<span style="font-size:0.8rem;color:var(--cream-dim);font-style:italic;">No photos uploaded yet.</span>';
+      return;
+    }
+    thumbs.innerHTML = data.map(p => `
+      <div class="photo-thumb-wrap">
+        <img src="${escHtml(p.url)}" alt="" loading="lazy">
+        <button class="photo-thumb-del" onclick="deleteGalleryPhoto('${p.id}','${escHtml(p.storage_path||'')}')">✕</button>
+      </div>
+    `).join('');
+  }
+
+  async function uploadGalleryPhotos(input) {
+    const files = [...input.files];
+    if (!files.length) return;
+    const status = document.getElementById('gallery-upload-status');
+    status.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`;
+    let done = 0;
+    for (const file of files) {
+      const compressed = await compressImage(file, 1600, 0.85);
+      const path = `gallery/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+      const { error: upErr } = await sb.storage.from('memories').upload(path, compressed, { contentType: 'image/jpeg' });
+      if (upErr) { status.textContent = 'Upload error: ' + upErr.message; continue; }
+      const url = sb.storage.from('memories').getPublicUrl(path).data.publicUrl;
+      await sb.from('gallery_photos').insert({ url, storage_path: path });
+      done++;
+      status.textContent = `Uploaded ${done} of ${files.length}…`;
+    }
+    status.textContent = `Done — ${done} photo${done !== 1 ? 's' : ''} added to gallery.`;
+    setTimeout(() => { status.textContent = ''; }, 3000);
+    input.value = '';
+    loadGallery();
+  }
+
+  async function deleteGalleryPhoto(id, storagePath) {
+    if (!confirm('Remove this photo from the gallery?')) return;
+    if (storagePath) await sb.storage.from('memories').remove([storagePath]);
+    await sb.from('gallery_photos').delete().eq('id', id);
+    loadGallery();
+  }
 
   // ══════════════════════════════════════
   // ── FAMILY WALL PINS ──
