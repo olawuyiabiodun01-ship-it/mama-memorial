@@ -279,6 +279,8 @@
       margin-bottom: 1.2rem;
     }
 
+    .pinned-row { border-left: 3px solid var(--gold); padding-left: 0.8rem; }
+
     @media (max-width: 600px) {
       .admin-section-body { padding: 1.2rem; }
       .event-block-header, .memory-row { flex-direction: column; gap: 0.8rem; }
@@ -557,20 +559,23 @@
     if (!memoriesData.length) {
       list.innerHTML = '<div class="empty-state">No memories yet.</div>'; return;
     }
-    list.innerHTML = memoriesData.map(m => `
-      <div class="memory-row${arrangeActive ? ' arrange-mode' : ''}" data-id="${m.id}" draggable="${arrangeActive}">
+    list.innerHTML = memoriesData.map(m => {
+      const pinned = m.sort_order !== null && m.sort_order < 0;
+      return `
+      <div class="memory-row${arrangeActive ? ' arrange-mode' : ''}${pinned ? ' pinned-row' : ''}" data-id="${m.id}" draggable="${arrangeActive}">
         <span class="drag-handle">⠿</span>
         <div class="memory-row-info">
-          <p class="memory-row-name">${escHtml(m.name || 'Anonymous')}</p>
+          <p class="memory-row-name">${pinned ? '★ ' : ''}${escHtml(m.name || 'Anonymous')}</p>
           ${m.relationship ? `<p class="memory-row-rel">${escHtml(m.relationship)}</p>` : ''}
           ${m.message ? `<p class="memory-row-text">${escHtml(m.message)}</p>` : ''}
           ${m.audio_url ? `<p class="memory-row-audio">🎙 Voice note attached</p>` : ''}
         </div>
         <div class="memory-row-actions">
+          <button class="btn" onclick="togglePin('${m.id}', ${pinned})" title="${pinned ? 'Unpin' : 'Pin to top'}">${pinned ? '★ Unpin' : '☆ Pin'}</button>
           <button class="delete-btn" onclick="deleteMemory('${m.id}')">Delete</button>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
     if (arrangeActive) bindDrag();
   }
@@ -578,6 +583,11 @@
   async function deleteMemory(id) {
     if (!confirm('Delete this memory? This cannot be undone.')) return;
     await sb.from('tributes').delete().eq('id', id);
+    loadMemories();
+  }
+
+  async function togglePin(id, currentlyPinned) {
+    await sb.from('tributes').update({ sort_order: currentlyPinned ? null : -1 }).eq('id', id);
     loadMemories();
   }
 

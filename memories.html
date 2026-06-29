@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,6 +7,67 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── SEARCH BAR ── */
+    .memories-search-wrap {
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      position: relative;
+    }
+    .memories-search-wrap input {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      color: var(--cream);
+      padding: 0.75rem 2.8rem 0.75rem 1.1rem;
+      font-family: 'Cormorant Garant', serif;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.3s;
+      box-sizing: border-box;
+    }
+    .memories-search-wrap input::placeholder { color: var(--cream-dim); font-style: italic; }
+    .memories-search-wrap input:focus { border-color: var(--gold); }
+    .search-clear {
+      position: absolute;
+      right: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--cream-dim);
+      font-size: 1rem;
+      cursor: pointer;
+      display: none;
+      padding: 0;
+      line-height: 1;
+    }
+    .search-count {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--cream-dim);
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── PINNED CARD ── */
+    .memory-card.pinned {
+      border-color: var(--gold);
+      position: relative;
+    }
+    .pin-badge {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.7rem;
+      font-size: 0.65rem;
+      font-family: 'Cormorant SC', serif;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      opacity: 0.8;
+    }
+  </style>
 </head>
 <body>
 
@@ -17,6 +78,13 @@
 </div>
 
 <div class="content">
+
+  <!-- Search bar -->
+  <div class="memories-search-wrap">
+    <input type="search" id="mem-search" placeholder="Search by name or keyword…" oninput="filterMemories(this.value)">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+  </div>
+  <p class="search-count" id="search-count" style="display:none;"></p>
 
   <!-- Memories wall -->
   <div class="memories-grid" id="memories-grid">
@@ -69,13 +137,15 @@
 <footer>
   <p>In loving memory of <span>Olawuyi Victoria Ayodele Arinke</span></p>
   <p style="margin-top:0.4rem;font-size:0.75rem;letter-spacing:0.12em;">23 May 1942 &nbsp;·&nbsp; 28 June 2014</p>
-  </footer>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
   const SUPABASE_URL  = 'https://apvslzcldlqzskawpzzk.supabase.co';
   const SUPABASE_ANON = 'sb_publishable_8hgovw8SLg4S4ZR2-p26Sg_v3CGpTPg';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  let allMemories = [];
 
   // ── LOAD MEMORIES ──
   async function loadMemories() {
@@ -84,7 +154,6 @@
       .order('sort_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false });
 
-    // Fallback if sort_order column doesn't exist yet
     if (error) {
       ({ data, error } = await sb.from('tributes').select('*')
         .order('created_at', { ascending: false }));
@@ -94,28 +163,77 @@
       grid.innerHTML = '<div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:2rem 1rem;">Be the first to share a memory.</div>';
       return;
     }
-    grid.innerHTML = data.map(m => `
-      <div class="memory-card" data-id="${m.id}">
+
+    allMemories = data;
+    renderCards(allMemories);
+
+    // Re-apply any active search
+    const q = document.getElementById('mem-search').value.trim();
+    if (q) filterMemories(q);
+  }
+  loadMemories();
+
+  function renderCards(list) {
+    const grid = document.getElementById('memories-grid');
+    if (!list.length) {
+      grid.innerHTML = '<div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:2rem 1rem;">No memories match your search.</div>';
+      return;
+    }
+    grid.innerHTML = list.map(m => {
+      const pinned = m.sort_order !== null && m.sort_order < 0;
+      return `
+      <div class="memory-card${pinned ? ' pinned' : ''}" data-id="${m.id}" data-search="${escHtml((m.name||'') + ' ' + (m.relationship||'') + ' ' + (m.message||'')).toLowerCase()}">
+        ${pinned ? '<span class="pin-badge">★ Featured</span>' : ''}
         ${m.message ? `<p class="memory-text" id="msg-${m.id}">${escHtml(m.message)}</p>
         <button class="read-more-btn" id="rm-${m.id}" onclick="toggleReadMore('${m.id}')">Read more</button>` : ''}
         ${m.audio_url ? `<audio class="memory-audio" controls src="${escHtml(m.audio_url)}"></audio>` : ''}
         <p class="memory-author">${escHtml(m.name || 'Anonymous')}</p>
         ${m.relationship ? `<p class="memory-rel">${escHtml(m.relationship)}</p>` : ''}
         <button onclick="adminDelete('${m.id}')" style="margin-top:0.6rem;background:none;border:none;color:var(--cream-dim);font-size:0.7rem;font-family:'Cormorant Garant',serif;letter-spacing:0.08em;cursor:pointer;opacity:0.4;padding:0;" title="Admin delete">✕ remove</button>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
-    data.forEach(m => {
+    list.forEach(m => {
       if (!m.message) return;
       const el = document.getElementById('msg-' + m.id);
       const btn = document.getElementById('rm-' + m.id);
       if (el && btn && el.scrollHeight > el.clientHeight + 2) btn.classList.add('visible');
     });
   }
-  loadMemories();
+
+  // ── SEARCH ──
+  function filterMemories(q) {
+    const clearBtn = document.getElementById('search-clear');
+    const countEl = document.getElementById('search-count');
+    clearBtn.style.display = q ? 'block' : 'none';
+
+    if (!q.trim()) {
+      renderCards(allMemories);
+      countEl.style.display = 'none';
+      return;
+    }
+
+    const term = q.trim().toLowerCase();
+    const filtered = allMemories.filter(m =>
+      (m.name || '').toLowerCase().includes(term) ||
+      (m.relationship || '').toLowerCase().includes(term) ||
+      (m.message || '').toLowerCase().includes(term)
+    );
+
+    renderCards(filtered);
+    countEl.style.display = 'block';
+    countEl.textContent = filtered.length === 0
+      ? 'No memories found'
+      : `${filtered.length} of ${allMemories.length} memor${filtered.length === 1 ? 'y' : 'ies'}`;
+  }
+
+  function clearSearch() {
+    document.getElementById('mem-search').value = '';
+    filterMemories('');
+  }
 
   function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   function toggleReadMore(id) {
     const el = document.getElementById('msg-' + id);
