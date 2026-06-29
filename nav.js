@@ -8,6 +8,7 @@
     { href: 'recordings.html',  label: 'Recordings',  icon: '◎' },
     { href: 'timeline.html',    label: 'Timeline',    icon: '◈' },
     { href: 'memories.html',    label: 'Memories',    icon: '◇' },
+    { href: 'family-wall.html', label: 'Family Wall', icon: '◈' },
     { href: 'foundation.html',  label: 'Foundation',  icon: '❋' },
   ];
 

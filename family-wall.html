@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Family Wall · Olawuyi Victoria Ayodele Arinke</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── WALL GRID ── */
+    .wall-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.6rem;
+      margin-bottom: 4rem;
+    }
+
+    .wall-card {
+      background: var(--bg2);
+      border: 1px solid rgba(200,169,110,0.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.45), 0 1px 4px rgba(200,169,110,0.06);
+      transform: perspective(800px) translateZ(0);
+      transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease;
+      overflow: hidden;
+      position: relative;
+    }
+    .wall-card:hover {
+      transform: perspective(800px) translateZ(8px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 2px 10px rgba(200,169,110,0.14);
+    }
+
+    /* media area */
+    .wall-media {
+      position: relative;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(200,169,110,0.2);
+      background: var(--bg3);
+    }
+    .wall-media img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease, filter 0.4s;
+      filter: brightness(0.88) sepia(0.05);
+    }
+    .wall-media:hover img { transform: scale(1.04); filter: brightness(1) sepia(0); }
+    .wall-media video {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* gold frame line on media */
+    .wall-media::after {
+      content: '';
+      position: absolute; inset: 0;
+      border: 1px solid rgba(200,169,110,0.35);
+      pointer-events: none;
+    }
+
+    .media-type-badge {
+      position: absolute;
+      top: 0.6rem; left: 0.7rem;
+      background: rgba(11,10,9,0.75);
+      border: 1px solid rgba(200,169,110,0.4);
+      color: var(--gold);
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      padding: 0.2rem 0.55rem;
+      backdrop-filter: blur(4px);
+    }
+
+    /* card body */
+    .wall-card-body { padding: 1.1rem 1.3rem 1.3rem; }
+    .wall-card-name {
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+      margin-bottom: 0.25rem;
+    }
+    .wall-card-caption {
+      font-size: 0.88rem;
+      color: var(--cream-dim);
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 0.9rem;
+    }
+    .wall-card-date {
+      font-size: 0.7rem;
+      color: var(--cream-dim);
+      opacity: 0.5;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.8rem;
+    }
+    .wall-delete-btn {
+      background: none;
+      border: 1px solid rgba(180,60,60,0.28);
+      color: rgba(180,60,60,0.5);
+      font-family: 'Cormorant SC', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      padding: 0.28rem 0.75rem;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .wall-delete-btn:hover { border-color: #b43c3c; color: #b43c3c; }
+
+    /* ── UPLOAD FORM ── */
+    .upload-section {
+      margin-top: 1rem;
+    }
+    .upload-section h3 {
+      font-family: 'Cormorant SC', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+    }
+    .upload-section .sub {
+      font-size: 0.85rem;
+      color: var(--cream-dim);
+      font-style: italic;
+      margin-bottom: 1.8rem;
+    }
+
+    .pin-note {
+      background: rgba(200,169,110,0.07);
+      border: 1px solid rgba(200,169,110,0.2);
+      padding: 0.9rem 1.2rem;
+      font-size: 0.83rem;
+      color: var(--cream-dim);
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .pin-note strong { color: var(--gold); font-style: normal; }
+
+    .file-drop-area {
+      border: 1px dashed rgba(200,169,110,0.35);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .file-drop-area:hover, .file-drop-area.drag-over {
+      border-color: var(--gold);
+      background: rgba(200,169,110,0.04);
+    }
+    .file-drop-area input[type=file] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .file-drop-icon { font-size: 2rem; color: var(--gold); opacity: 0.5; margin-bottom: 0.5rem; }
+    .file-drop-text { font-family: 'Cormorant SC', serif; font-size: 0.72rem; letter-spacing: 0.14em; color: var(--cream-dim); }
+    .file-drop-name { font-size: 0.82rem; color: var(--gold); margin-top: 0.4rem; font-style: italic; }
+
+    .preview-wrap { margin-bottom: 1rem; display: none; }
+    .preview-wrap img, .preview-wrap video {
+      max-width: 100%; max-height: 240px;
+      border: 1px solid rgba(200,169,110,0.3);
+      display: block;
+    }
+
+    /* ── LIGHTBOX ── */
+    #wall-lightbox {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.94);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    #wall-lightbox.open { display: flex; }
+    #wall-lightbox img { max-width: 92vw; max-height: 90vh; object-fit: contain; border: 1px solid var(--border); }
+    #wall-lb-close {
+      position: absolute; top: 1.4rem; right: 2rem;
+      background: none; border: none;
+      color: var(--cream-dim); font-size: 2rem; cursor: pointer; line-height: 1;
+    }
+    #wall-lb-close:hover { color: var(--gold); }
+
+    @media (max-width: 600px) {
+      .wall-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-hero">
+  <p class="page-label">Family</p>
+  <h1 class="page-title">Family Wall</h1>
+  <div class="page-divider"></div>
+</div>
+
+<div class="content">
+
+  <!-- Media wall -->
+  <div class="wall-grid" id="wall-grid">
+    <div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:3rem 1rem;">
+      Loading…
+    </div>
+  </div>
+
+  <!-- Upload form -->
+  <div class="form-box upload-section">
+    <h3>Add Your Photos &amp; Videos</h3>
+    <p class="sub">Share pictures or videos with the family — everyone can see what you add.</p>
+
+    <div class="pin-note">
+      <strong>Important:</strong> You will choose a 4-digit PIN when uploading. You will need that same PIN to delete your post later. Please remember it — there is no way to recover it.
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="fw-name">Your Name</label>
+        <input type="text" id="fw-name" placeholder="e.g. Adetunji">
+      </div>
+      <div class="form-field">
+        <label for="fw-pin">Your 4-Digit PIN</label>
+        <input type="password" id="fw-pin" maxlength="4" placeholder="e.g. 1234" inputmode="numeric"
+               oninput="this.value=this.value.replace(/\D/g,'').slice(0,4)">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="fw-caption">Caption <span style="font-style:italic;opacity:0.6">(optional)</span></label>
+      <input type="text" id="fw-caption" placeholder="A short description…">
+    </div>
+
+    <div class="form-field">
+      <label>Photo or Video</label>
+      <div class="file-drop-area" id="drop-area">
+        <input type="file" id="fw-file" accept="image/*,video/*" onchange="onFileSelect(this)">
+        <div class="file-drop-icon">⊕</div>
+        <p class="file-drop-text">Tap to choose or drag a photo / video here</p>
+        <p class="file-drop-name" id="file-name-display"></p>
+      </div>
+      <div class="preview-wrap" id="preview-wrap">
+        <img id="preview-img" src="" alt="" style="display:none;">
+        <video id="preview-vid" controls style="display:none;"></video>
+      </div>
+    </div>
+
+    <button class="btn primary" id="fw-submit" style="width:100%;padding:0.9rem;">
+      Share with the Family
+    </button>
+    <p class="submit-status" id="fw-status"></p>
+  </div>
+
+</div>
+
+<!-- Lightbox -->
+<div id="wall-lightbox">
+  <button id="wall-lb-close">&times;</button>
+  <img id="wall-lb-img" src="" alt="">
+</div>
+
+<footer>
+  <p>In loving memory of <span>Olawuyi Victoria Ayodele Arinke</span></p>
+  <p style="margin-top:0.4rem;font-size:0.75rem;letter-spacing:0.12em;">23 May 1942 &nbsp;·&nbsp; 28 June 2014</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL  = 'https://apvslzcldlqzskawpzzk.supabase.co';
+  const SUPABASE_ANON = 'sb_publishable_8hgovw8SLg4S4ZR2-p26Sg_v3CGpTPg';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  function escHtml(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+  }
+
+  // ── LOAD WALL ──
+  async function loadWall() {
+    const grid = document.getElementById('wall-grid');
+    const { data, error } = await sb.from('family_media').select('*').order('created_at', { ascending: false });
+    if (error || !data || !data.length) {
+      grid.innerHTML = '<div style="color:var(--cream-dim);font-style:italic;font-size:0.9rem;grid-column:1/-1;text-align:center;padding:3rem 1rem;">Be the first to add a photo or video.</div>';
+      return;
+    }
+    grid.innerHTML = data.map(item => {
+      const isVideo = item.media_type === 'video';
+      return `
+        <div class="wall-card" data-id="${item.id}">
+          <div class="wall-media" ${!isVideo ? `onclick="openLightbox('${escHtml(item.media_url)}')"` : ''}>
+            <span class="media-type-badge">${isVideo ? 'Video' : 'Photo'}</span>
+            ${isVideo
+              ? `<video src="${escHtml(item.media_url)}" controls preload="metadata" playsinline></video>`
+              : `<img loading="lazy" src="${escHtml(item.media_url)}" alt="${escHtml(item.caption||item.name||'')}">`
+            }
+          </div>
+          <div class="wall-card-body">
+            <p class="wall-card-name">${escHtml(item.name||'Family Member')}</p>
+            ${item.caption ? `<p class="wall-card-caption">${escHtml(item.caption)}</p>` : ''}
+            <p class="wall-card-date">${formatDate(item.created_at)}</p>
+            <button class="wall-delete-btn" onclick="deleteItem('${item.id}','${escHtml(item.storage_path||'')}')">✕ Delete my post</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  loadWall();
+
+  // ── LIGHTBOX ──
+  const lb    = document.getElementById('wall-lightbox');
+  const lbImg = document.getElementById('wall-lb-img');
+  document.getElementById('wall-lb-close').onclick = () => lb.classList.remove('open');
+  lb.addEventListener('click', e => { if (e.target === lb) lb.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
+  function openLightbox(src) { lbImg.src = src; lb.classList.add('open'); }
+
+  // ── FILE PREVIEW ──
+  function onFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('file-name-display').textContent = file.name;
+    const wrap = document.getElementById('preview-wrap');
+    const img  = document.getElementById('preview-img');
+    const vid  = document.getElementById('preview-vid');
+    wrap.style.display = 'block';
+    if (file.type.startsWith('video/')) {
+      img.style.display = 'none';
+      vid.style.display = 'block';
+      vid.src = URL.createObjectURL(file);
+    } else {
+      vid.style.display = 'none';
+      img.style.display = 'block';
+      img.src = URL.createObjectURL(file);
+    }
+  }
+
+  // Drag-over highlight
+  const dropArea = document.getElementById('drop-area');
+  ['dragenter','dragover'].forEach(ev => dropArea.addEventListener(ev, e => { e.preventDefault(); dropArea.classList.add('drag-over'); }));
+  ['dragleave','drop'].forEach(ev => dropArea.addEventListener(ev, () => dropArea.classList.remove('drag-over')));
+
+  // ── UPLOAD ──
+  document.getElementById('fw-submit').onclick = async () => {
+    const name    = document.getElementById('fw-name').value.trim();
+    const pin     = document.getElementById('fw-pin').value.trim();
+    const caption = document.getElementById('fw-caption').value.trim();
+    const file    = document.getElementById('fw-file').files[0];
+    const status  = document.getElementById('fw-status');
+    const btn     = document.getElementById('fw-submit');
+
+    if (!name)         { status.textContent = 'Please enter your name.'; return; }
+    if (pin.length !== 4) { status.textContent = 'Please enter a 4-digit PIN.'; return; }
+    if (!file)         { status.textContent = 'Please choose a photo or video.'; return; }
+
+    const isVideo    = file.type.startsWith('video/');
+    const media_type = isVideo ? 'video' : 'photo';
+    const ext        = file.name.split('.').pop();
+    const path       = `family-wall/${Date.now()}-${name.replace(/\s+/g,'-').toLowerCase()}.${ext}`;
+
+    status.textContent = 'Uploading…'; btn.disabled = true;
+
+    const { error: upErr } = await sb.storage.from('memories').upload(path, file, { contentType: file.type });
+    if (upErr) { status.textContent = 'Upload failed — ' + upErr.message; btn.disabled = false; return; }
+
+    const media_url = sb.storage.from('memories').getPublicUrl(path).data.publicUrl;
+
+    const { error } = await sb.from('family_media').insert({ name, caption, media_url, storage_path: path, media_type, pin });
+    if (error) { status.textContent = 'Something went wrong — please try again.'; btn.disabled = false; return; }
+
+    status.textContent = '✓ Uploaded! Remember your PIN: ' + pin;
+    document.getElementById('fw-name').value    = '';
+    document.getElementById('fw-pin').value     = '';
+    document.getElementById('fw-caption').value = '';
+    document.getElementById('fw-file').value    = '';
+    document.getElementById('file-name-display').textContent = '';
+    document.getElementById('preview-wrap').style.display = 'none';
+    btn.disabled = false;
+    loadWall();
+  };
+
+  // ── DELETE ──
+  async function deleteItem(id, storagePath) {
+    const pin = prompt('Enter your 4-digit PIN to delete this post:');
+    if (pin === null) return;
+
+    const { data, error } = await sb.from('family_media').select('pin').eq('id', id).single();
+    if (error || !data) { alert('Could not verify — please try again.'); return; }
+    if (data.pin !== pin) { alert('Incorrect PIN. Only the person who uploaded this can delete it.'); return; }
+
+    if (storagePath) await sb.storage.from('memories').remove([storagePath]);
+    await sb.from('family_media').delete().eq('id', id);
+    loadWall();
+  }
+</script>
+<script src="nav.js"></script>
+</body>
+</html>
