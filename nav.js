@@ -1,4 +1,4 @@
-// Injects the sidebar into every page and marks the active link.
+// Injects the sidebar and theme toggle into every page.
 (function () {
   const page = location.pathname.split('/').pop() || 'index.html';
 
@@ -13,6 +13,8 @@
   ];
 
   const html = `
+    <button id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">☀</button>
+
     <button id="sidebar-toggle" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -42,9 +44,36 @@
 
   document.body.insertAdjacentHTML('afterbegin', html);
 
-  const toggle   = document.getElementById('sidebar-toggle');
-  const sidebar  = document.getElementById('sidebar');
-  const overlay  = document.getElementById('sidebar-overlay');
+  // ── THEME TOGGLE ──
+  const themeBtn = document.getElementById('theme-toggle');
+  const root     = document.documentElement;
+
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      root.setAttribute('data-theme', 'light');
+      themeBtn.textContent = '☾';
+      themeBtn.title = 'Switch to dark mode';
+    } else {
+      root.removeAttribute('data-theme');
+      themeBtn.textContent = '☀';
+      themeBtn.title = 'Switch to light mode';
+    }
+  }
+
+  const saved = localStorage.getItem('memorial-theme') || 'dark';
+  applyTheme(saved);
+
+  themeBtn.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next    = current === 'light' ? 'dark' : 'light';
+    localStorage.setItem('memorial-theme', next);
+    applyTheme(next);
+  });
+
+  // ── SIDEBAR ──
+  const toggle  = document.getElementById('sidebar-toggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
 
   function open() {
     sidebar.classList.add('open');

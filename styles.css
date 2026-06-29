@@ -15,7 +15,42 @@
   --border:    rgba(200, 169, 110, 0.18);
 }
 
-html { scroll-behavior: smooth; }
+[data-theme="light"] {
+  --bg:        #faf7f2;
+  --bg2:       #ffffff;
+  --bg3:       #f0ebe0;
+  --gold:      #9a7535;
+  --gold-lt:   #b8922a;
+  --cream:     #2c2416;
+  --cream-dim: #6b5a3e;
+  --border:    rgba(154, 117, 53, 0.22);
+}
+
+/* ── THEME TOGGLE ── */
+#theme-toggle {
+  position: fixed;
+  top: 1.2rem;
+  left: 1.4rem;
+  z-index: 400;
+  width: 44px;
+  height: 44px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s, border-color 0.3s;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+#theme-toggle:hover { background: var(--bg3); border-color: var(--gold); }
+
+html {
+  scroll-behavior: smooth;
+  transition: background 0.3s, color 0.3s;
+}
 
 body {
   background: var(--bg);
@@ -23,6 +58,7 @@ body {
   font-family: 'Cormorant Garant', Georgia, serif;
   font-size: 18px;
   line-height: 1.7;
+  transition: background 0.3s, color 0.3s;
 }
 
 /* ── SIDEBAR TOGGLE BUTTON ── */
