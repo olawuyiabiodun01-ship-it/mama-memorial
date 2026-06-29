@@ -162,11 +162,35 @@
     .file-drop-text { font-family: 'Cormorant SC', serif; font-size: 0.72rem; letter-spacing: 0.14em; color: var(--cream-dim); }
     .file-drop-name { font-size: 0.82rem; color: var(--gold); margin-top: 0.4rem; font-style: italic; }
 
-    .preview-wrap { margin-bottom: 1rem; display: none; }
-    .preview-wrap img, .preview-wrap video {
-      max-width: 100%; max-height: 240px;
-      border: 1px solid rgba(200,169,110,0.3);
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .preview-thumb {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 1px solid rgba(200,169,110,0.35);
+    }
+    .preview-thumb img, .preview-thumb video {
+      width: 100%; height: 100%;
+      object-fit: cover;
       display: block;
+    }
+    .preview-thumb-remove {
+      position: absolute; top: 2px; right: 2px;
+      width: 18px; height: 18px;
+      background: rgba(0,0,0,0.7);
+      border: none; border-radius: 50%;
+      color: #fff; font-size: 10px;
+      cursor: pointer; line-height: 18px;
+      text-align: center; padding: 0;
+    }
+    .preview-count {
+      font-size: 0.8rem; color: var(--gold);
+      font-style: italic; margin-bottom: 0.5rem;
     }
 
     /* ── LIGHTBOX ── */
@@ -231,22 +255,20 @@
     </div>
 
     <div class="form-field">
-      <label for="fw-caption">Caption <span style="font-style:italic;opacity:0.6">(optional)</span></label>
-      <input type="text" id="fw-caption" placeholder="A short description…">
+      <label for="fw-caption">Your Story <span style="font-style:italic;opacity:0.6">(one narration for all photos)</span></label>
+      <textarea id="fw-caption" placeholder="Write your narration here — it will appear on every photo you select…" style="min-height:90px;"></textarea>
     </div>
 
     <div class="form-field">
-      <label>Photo or Video</label>
-      <input type="file" id="fw-file" accept="image/*,video/*" style="display:none" onchange="onFileSelect(this)">
+      <label>Photos &amp; Videos <span style="font-style:italic;opacity:0.6">(select as many as you like)</span></label>
+      <input type="file" id="fw-file" accept="image/*,video/*" multiple style="display:none" onchange="onFileSelect(this)">
       <label for="fw-file" class="file-drop-area" id="drop-area">
         <div class="file-drop-icon">⊕</div>
-        <p class="file-drop-text">Tap to choose a photo or video</p>
+        <p class="file-drop-text">Tap to choose photos or videos</p>
         <p class="file-drop-name" id="file-name-display"></p>
       </label>
-      <div class="preview-wrap" id="preview-wrap">
-        <img id="preview-img" src="" alt="" style="display:none;">
-        <video id="preview-vid" controls style="display:none;"></video>
-      </div>
+      <p class="preview-count" id="preview-count" style="display:none;"></p>
+      <div class="preview-grid" id="preview-grid"></div>
     </div>
 
     <button class="btn primary" id="fw-submit" style="width:100%;padding:0.9rem;">
@@ -332,23 +354,48 @@
   function openLightbox(src) { lbImg.src = src; lb.classList.add('open'); }
 
   // ── FILE PREVIEW ──
+  let selectedFiles = [];
+
   function onFileSelect(input) {
-    const file = input.files[0];
-    if (!file) return;
-    document.getElementById('file-name-display').textContent = file.name;
-    const wrap = document.getElementById('preview-wrap');
-    const img  = document.getElementById('preview-img');
-    const vid  = document.getElementById('preview-vid');
-    wrap.style.display = 'block';
-    if (file.type.startsWith('video/')) {
-      img.style.display = 'none';
-      vid.style.display = 'block';
-      vid.src = URL.createObjectURL(file);
-    } else {
-      vid.style.display = 'none';
-      img.style.display = 'block';
-      img.src = URL.createObjectURL(file);
+    const newFiles = [...input.files];
+    if (!newFiles.length) return;
+    selectedFiles = [...selectedFiles, ...newFiles];
+    renderPreviews();
+    input.value = ''; // reset so same files can be re-added if needed
+  }
+
+  function renderPreviews() {
+    const grid  = document.getElementById('preview-grid');
+    const count = document.getElementById('preview-count');
+    const label = document.getElementById('file-name-display');
+
+    if (!selectedFiles.length) {
+      grid.innerHTML = '';
+      count.style.display = 'none';
+      label.textContent = '';
+      return;
     }
+
+    count.style.display = 'block';
+    count.textContent = `${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} selected`;
+    label.textContent = '';
+
+    grid.innerHTML = selectedFiles.map((f, i) => {
+      const isVid = f.type.startsWith('video/');
+      const url   = URL.createObjectURL(f);
+      return `
+        <div class="preview-thumb">
+          ${isVid
+            ? `<video src="${url}" preload="metadata"></video>`
+            : `<img src="${url}" alt="">`}
+          <button class="preview-thumb-remove" onclick="removeFile(${i})" title="Remove">✕</button>
+        </div>`;
+    }).join('');
+  }
+
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderPreviews();
   }
 
   // Drag-over highlight
@@ -394,66 +441,54 @@
     const name    = document.getElementById('fw-name').value.trim();
     const pin     = document.getElementById('fw-pin').value.trim();
     const caption = document.getElementById('fw-caption').value.trim();
-    const file    = document.getElementById('fw-file').files[0];
     const status  = document.getElementById('fw-status');
     const btn     = document.getElementById('fw-submit');
 
-    if (!name)            { status.textContent = 'Please enter your name.'; return; }
-    if (pin.length !== 4) { status.textContent = 'Please enter a 4-digit PIN.'; return; }
-    if (!file)            { status.textContent = 'Please choose a photo or video.'; return; }
+    if (!name)               { status.textContent = 'Please enter your name.'; return; }
+    if (pin.length !== 4)    { status.textContent = 'Please enter a 4-digit PIN.'; return; }
+    if (!selectedFiles.length) { status.textContent = 'Please choose at least one photo or video.'; return; }
 
     btn.disabled = true;
     status.textContent = '';
+    const total = selectedFiles.length;
 
-    const isVideo    = file.type.startsWith('video/');
-    const media_type = isVideo ? 'video' : 'photo';
-    let   uploadFile = file;
-    let   ext        = file.name.split('.').pop().toLowerCase();
-    let   mime       = file.type;
+    for (let i = 0; i < total; i++) {
+      const file     = selectedFiles[i];
+      const isVideo  = file.type.startsWith('video/');
+      const media_type = isVideo ? 'video' : 'photo';
+      let uploadFile = file;
+      let ext        = file.name.split('.').pop().toLowerCase();
+      let mime       = file.type;
 
-    if (!isVideo) {
-      const origKB = Math.round(file.size / 1024);
-      setProgress(10, `Compressing photo (${origKB} KB)…`);
-      uploadFile = await compressImage(file, 1400, 0.82);
-      const newKB = Math.round(uploadFile.size / 1024);
-      ext  = 'jpg';
-      mime = 'image/jpeg';
-      setProgress(30, `Compressed ${origKB} KB → ${newKB} KB. Uploading…`);
-    } else {
-      const mb = (file.size / 1024 / 1024).toFixed(1);
-      setProgress(10, `Uploading video (${mb} MB) — this may take a moment…`);
+      if (!isVideo) {
+        setProgress(Math.round((i / total) * 80), `Compressing photo ${i + 1} of ${total}…`);
+        uploadFile = await compressImage(file, 1400, 0.82);
+        ext  = 'jpg';
+        mime = 'image/jpeg';
+      } else {
+        const mb = (file.size / 1024 / 1024).toFixed(1);
+        setProgress(Math.round((i / total) * 80), `Uploading video ${i + 1} of ${total} (${mb} MB)…`);
+      }
+
+      const path = `family-wall/${Date.now()}-${i}-${name.replace(/\s+/g,'-').toLowerCase()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('memories').upload(path, uploadFile, { contentType: mime });
+      if (upErr) { status.textContent = `File ${i + 1} failed: ${upErr.message}`; continue; }
+
+      const media_url = sb.storage.from('memories').getPublicUrl(path).data.publicUrl;
+      await sb.from('family_media').insert({ name, caption, media_url, storage_path: path, media_type, pin });
+
+      setProgress(Math.round(((i + 1) / total) * 100), `Uploaded ${i + 1} of ${total}…`);
     }
 
-    const path = `family-wall/${Date.now()}-${name.replace(/\s+/g,'-').toLowerCase()}.${ext}`;
-    const { error: upErr } = await sb.storage.from('memories').upload(path, uploadFile, { contentType: mime });
-
-    if (upErr) {
-      clearProgress();
-      status.textContent = 'Upload failed — ' + upErr.message;
-      btn.disabled = false;
-      return;
-    }
-
-    setProgress(80, 'Saving…');
-    const media_url = sb.storage.from('memories').getPublicUrl(path).data.publicUrl;
-    const { error } = await sb.from('family_media').insert({ name, caption, media_url, storage_path: path, media_type, pin });
-
-    if (error) {
-      clearProgress();
-      status.textContent = 'Something went wrong — please try again.';
-      btn.disabled = false;
-      return;
-    }
-
-    setProgress(100, 'Done!');
+    setProgress(100, 'All done!');
     setTimeout(clearProgress, 1500);
-    status.textContent = '✓ Shared! Remember your PIN: ' + pin;
+
+    status.textContent = `✓ ${total} file${total > 1 ? 's' : ''} shared! Remember your PIN: ${pin}`;
     document.getElementById('fw-name').value    = '';
     document.getElementById('fw-pin').value     = '';
     document.getElementById('fw-caption').value = '';
-    document.getElementById('fw-file').value    = '';
-    document.getElementById('file-name-display').textContent = '';
-    document.getElementById('preview-wrap').style.display = 'none';
+    selectedFiles = [];
+    renderPreviews();
     btn.disabled = false;
     loadWall();
   };
