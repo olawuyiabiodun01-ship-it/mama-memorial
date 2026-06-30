@@ -71,13 +71,13 @@ body::before {
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
-  opacity: 0.045;
-  filter: blur(1px) grayscale(100%);
+  opacity: 0.13;
+  filter: blur(0.5px) grayscale(100%);
   pointer-events: none;
 }
 
 [data-theme="light"] body::before {
-  opacity: 0.06;
+  opacity: 0.16;
 }
 
 /* ── SIDEBAR TOGGLE BUTTON ── */
