@@ -95,6 +95,11 @@
   overlay.addEventListener('click', close);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
+  // ── SERVICE WORKER (PWA) ──
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/mama-memorial/sw.js').catch(() => {});
+  }
+
   // ── SWIPE NAVIGATION ──
   const pages = links.map(l => l.href);
   const currentIdx = pages.indexOf(page);

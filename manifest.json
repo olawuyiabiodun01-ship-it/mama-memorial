@@ -1,0 +1,25 @@
+{
+  "name": "Olawuyi Victoria Ayodele Arinke",
+  "short_name": "Mama Memorial",
+  "description": "In loving memory of Olawuyi Victoria Ayodele Arinke — 23 May 1942 · 28 June 2014",
+  "start_url": "/mama-memorial/index.html",
+  "scope": "/mama-memorial/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0a09",
+  "theme_color": "#c8a96e",
+  "icons": [
+    {
+      "src": "icon-192.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
