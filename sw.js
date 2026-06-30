@@ -1,4 +1,4 @@
-const CACHE = 'mama-memorial-v1';
+const CACHE = 'mama-memorial-v2';
 const ASSETS = [
   '/mama-memorial/',
   '/mama-memorial/index.html',
@@ -14,8 +14,9 @@ const ASSETS = [
   '/mama-memorial/portrait.jpg',
   '/mama-memorial/mama-vintage.jpeg',
   '/mama-memorial/mama-hymn.mp3',
-  '/mama-memorial/icon-192.jpg',
-  '/mama-memorial/icon-512.jpg',
+  '/mama-memorial/icon-192.png',
+  '/mama-memorial/icon-512.png',
+  '/mama-memorial/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', e => {
