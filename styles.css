@@ -61,6 +61,25 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
+/* ── VINTAGE PORTRAIT BACKGROUND ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url('mama-vintage.jpeg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  opacity: 0.045;
+  filter: blur(1px) grayscale(100%);
+  pointer-events: none;
+}
+
+[data-theme="light"] body::before {
+  opacity: 0.06;
+}
+
 /* ── SIDEBAR TOGGLE BUTTON ── */
 #sidebar-toggle {
   position: fixed;
