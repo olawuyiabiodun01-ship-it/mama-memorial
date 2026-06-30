@@ -74,6 +74,8 @@ body::before {
   opacity: 0.13;
   filter: blur(0.5px) grayscale(100%);
   pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 75% 80% at 95% 5%, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 75% 80% at 95% 5%, black 30%, transparent 75%);
 }
 
 [data-theme="light"] body::before {
